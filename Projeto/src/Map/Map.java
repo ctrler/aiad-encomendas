@@ -1,10 +1,12 @@
 package Map;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Map {
 	
@@ -124,6 +126,87 @@ public class Map {
 		}
 			
 		return output;
+	}
+	
+public boolean makeMove(String direction) throws EndOfMapException{
+		
+		Point truckPosition = getTruckPosition();
+		Truck truck = (Truck)getXY(truckPosition.x+1, truckPosition.y+1);
+		
+		Point destination = null;
+		
+		switch (direction.toLowerCase()){
+			case "u":
+				destination =  new Point(truckPosition.x, truckPosition.y+1);
+				break;
+			case "l":
+				destination =  new Point(truckPosition.x-1, truckPosition.y);
+				break;
+			case "d":
+				destination =  new Point(truckPosition.x, truckPosition.y-1);
+				break;
+			case "r":
+				destination =  new Point(truckPosition.x+1, truckPosition.y);
+				break;
+			case "w":
+				return true;
+			case "a":
+				throw new EndOfMapException("You aborted the city-finding activity. Score: " + truck.getFinalScore());
+			default:
+				return false;
+		}
+		
+		Cell object = map.get(destination.y).get(destination.x);
+		
+		if(object instanceof City){
+			map.get(truckPosition.y).set(truckPosition.x, new Road());
+			map.get(destination.y).set(destination.x, truck);
+			truck.addStep();
+			System.out.println("Congratulations, package delivered! Score: " + truck.getFinalScore());
+			
+			//TODO: Remove Sleep
+			try {
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//throw new EndOfMapException("Congratulations, package delivered! Score: " + truck.getFinalScore());
+			// mudar de mapa
+		}
+		else if(object instanceof Road){
+			map.get(truckPosition.y).set(truckPosition.x, new Road());
+			map.get(destination.y).set(destination.x, truck);
+			truck.addStep();
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public Point getTruckPosition(){
+		for(int i=0; i < map.size(); i++)
+			for(int j=0; j < map.get(i).size(); j++){
+				if(map.get(i).get(j) instanceof Truck)
+					return new Point(j,i);
+			}
+		return null;
+	}
+	
+	public Point convert0BasedTo1Based(Point p){
+		return new Point(p.x + 1, p.y + 1);
+	}
+	
+	public LinkedList<Point> getDeliveries(){
+		LinkedList<Point> temp = new LinkedList<Point>();
+		
+		for(int y = 1; y <= getHeight(); y++){
+			for(int x = 1; x <= getWidth(); x++){
+				if(getXY(x, y) instanceof City)
+					temp.add(new Point(x, y));
+			}
+		}
+		return temp;
 	}
 
 
