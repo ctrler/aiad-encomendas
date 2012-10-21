@@ -1,5 +1,7 @@
 package communication;
 
+import java.util.List;
+
 import Map.Parcel;
 
 public class CentralAgent {
@@ -8,8 +10,11 @@ public class CentralAgent {
 	//Number of agents in a game
 	private int nTruckAgents = 0;
 	private int nAgentsRegistered=0;
-	public TruckAgent[] truckAgents = null;
-	public Parcel[] parcelList = null;
+	
+	private int nParcels = 0;
+	
+	public List<TruckAgent> truckAgentList;
+	public List<Parcel> parcelList;
 	
 	public void setNTruckAgents(int nTruckAgents){
 		this.nTruckAgents = nTruckAgents;
@@ -17,6 +22,16 @@ public class CentralAgent {
 	
 	public void setNAgentsRegistered(int nAgentsRegistered){
 		this.nAgentsRegistered = nAgentsRegistered;
+	}
+	
+	public void addAgent(TruckAgent agent){
+		truckAgentList.add(agent);
+		nTruckAgents++;
+	}
+	
+	public void addParcel(Parcel parcel){
+		parcelList.add(parcel);
+		nParcels++;
 	}
 
 }

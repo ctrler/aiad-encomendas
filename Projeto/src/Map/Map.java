@@ -173,6 +173,7 @@ public boolean makeMove(String direction) throws EndOfMapException{
 			}
 			//throw new EndOfMapException("Congratulations, package delivered! Score: " + truck.getFinalScore());
 			// mudar de mapa
+			return true;
 		}
 		else if(object instanceof Road){
 			map.get(truckPosition.y).set(truckPosition.x, new Road());

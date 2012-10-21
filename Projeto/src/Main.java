@@ -46,7 +46,6 @@ public class Main {
 		while(!map.getDeliveries().isEmpty()){
 			LinkedList<Point> destinations = map.getDeliveries();
 			Point truckPosition = map.convert0BasedTo1Based(map.getTruckPosition());
-			//LinkedList<Point> path = autoPilot.getPath(truckPosition, destinations);
 			Path path = autoPilot.getPath(truckPosition, destinations);
 			path_str += play_ia_walk(truckPosition, path);
 		}
@@ -69,8 +68,9 @@ public class Main {
 				//map.update();
 			} catch (EndOfMapException e) {
 				System.out.println(e.getMessage());
-				truckPosition = point;
+				
 			}
+			truckPosition = point;
 			System.out.println(map.print());
 		}
 		return path_str;
