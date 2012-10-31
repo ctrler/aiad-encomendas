@@ -1,10 +1,11 @@
-package communication;
+package feups.communication;
 
 import jade.core.AID;
 
 import java.io.Serializable;
 
-import Map.Path;
+import feups.map.Path;
+
 
 public class TruckAgent implements Serializable{
 	

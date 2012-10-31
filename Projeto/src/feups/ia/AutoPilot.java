@@ -1,4 +1,4 @@
-package IA;
+package feups.ia;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
-import Map.Cell;
-import Map.Path;
-import Map.Road;
-import Map.City;
-import Map.Map;
-import Map.Path;
+import feups.map.Cell;
+import feups.map.City;
+import feups.map.Map;
+import feups.map.Path;
+import feups.map.Road;
+
 
 public class AutoPilot {
 	

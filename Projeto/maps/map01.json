@@ -1,0 +1,67 @@
+{
+    "name": "test map",
+    "map": "example1.map",
+    "cities": [
+        {
+            "name": "Vila do Conde",
+            "position": { "x": 1, "y": 0 }
+        },
+        {
+            "name": "Porto", 
+            "position": {"x": 8,"y": 5 }
+        },
+        {
+            "name": "Póvoa de Varzim",
+            "position": { "x": 5, "y": 5 }
+        },
+        {
+            "name": "Viana do Castelo",
+            "position": { "x": 5, "y": 9 }
+        }
+    ],
+    "parcels": [
+        {
+            "name": "parcel0",
+            "position": "Vila do Conde",
+            "destination": "Viana do Castelo"
+        },
+        {
+            "name": "parcel1",
+            "position": "Viana do Castelo",
+            "destination": "Vila do Conde"
+        },
+        {
+            "name": "parcel2",
+            "position": "Porto",
+            "destination": "Vila do Conde"
+        },
+        {
+            "name": "parcel3",
+            "position": "Póvoa de Varzim",
+            "destination": "Porto"
+        }
+    ],
+    "trucks": [
+        {
+            "name": "truck0",
+            "parcels": [
+                {
+                    "name": "parcel2"
+                },
+                {
+                    "name": "parcel3"
+                }
+            ],
+            "position": "Póvoa de Varzim"
+        },
+        {
+            "name": "truck1",
+            "parcels": [
+                {
+                    "name": "parcel1"
+                }
+            ],
+            "position": "Vila do Conde"
+        }
+    ]
+}

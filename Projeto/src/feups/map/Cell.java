@@ -1,4 +1,4 @@
-package Map;
+package feups.map;
 
 public interface Cell {
 	

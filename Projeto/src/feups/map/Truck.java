@@ -1,4 +1,4 @@
-package Map;
+package feups.map;
 
 public class Truck implements Cell{
 	

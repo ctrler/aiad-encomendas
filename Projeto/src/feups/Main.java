@@ -1,14 +1,16 @@
+package feups;
 import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import IA.AutoPilot;
-import Map.EndOfMapException;
-import Map.Map;
-import Map.Path;
-import Map.Truck;
+import feups.ia.AutoPilot;
+import feups.map.EndOfMapException;
+import feups.map.Map;
+import feups.map.Path;
+import feups.map.Truck;
+
 
 public class Main {
 	
@@ -22,23 +24,27 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Main main = new Main();
+		Main main = new Main(); //TODO why is this used?
 	}
 	
 	public Main() {
 		System.out.println("The file will now be loaded!\n");
+		
+		Parser parser = new Parser();
+		
+		parser.getDetails();
 
-	    try {
-			map = new Map(INPUT_FILE);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	    play_ia();
+//	    try {
+//			map = new Map(INPUT_FILE);
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//	    play_ia();
 		//System.out.println(map.print());
 	}
 	
 	private void play_ia() {
-		System.out.println("Map for ia");
+		System.out.println("feups.map for ia");
 		System.out.println(map.print());
 		AutoPilot autoPilot = new AutoPilot(map);
 		

@@ -1,4 +1,4 @@
-package Map;
+package feups.map;
 
 import java.awt.Point;
 import java.util.LinkedList;

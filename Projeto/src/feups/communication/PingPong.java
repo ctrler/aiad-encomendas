@@ -1,4 +1,4 @@
-package communication;
+package feups.communication;
 
 import jade.core.*;
 import jade.core.behaviours.SimpleBehaviour;

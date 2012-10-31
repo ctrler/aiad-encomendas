@@ -1,8 +1,9 @@
-package communication;
+package feups.communication;
 
 import java.util.List;
 
-import Map.Parcel;
+import feups.map.Parcel;
+
 
 public class CentralAgent {
 	
