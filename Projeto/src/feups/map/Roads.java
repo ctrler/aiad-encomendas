@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class Map {
+public class Roads {
 	
 	private ArrayList<ArrayList<Cell>> map;
 	private int cities = 0;
@@ -19,12 +19,12 @@ public class Map {
 	 * @param path Path to filename
 	 * @throws FileNotFoundException 
 	 */
-	public Map(String path) throws FileNotFoundException {
+	public Roads(String path) throws FileNotFoundException {
 		map = new ArrayList<ArrayList<Cell>>();
 		this.load(path);
 	}
 	
-	public Map(ArrayList<String> lines) {
+	public Roads(ArrayList<String> lines) {
 		map = new ArrayList<ArrayList<Cell>>();
 		this.load(lines);
 	}

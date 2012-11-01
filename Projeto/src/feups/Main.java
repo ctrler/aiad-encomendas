@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import feups.ia.AutoPilot;
 import feups.map.EndOfMapException;
-import feups.map.Map;
+import feups.map.Roads;
 import feups.map.Path;
 import feups.map.Truck;
 
@@ -18,7 +18,7 @@ public class Main {
 	public static final String INPUT_FILE = "maps/example1.map";
 
 	//Initialization of the map
-	private Map map;
+	private Roads map;
 	
 	/**
 	 * @param args
@@ -35,7 +35,7 @@ public class Main {
 		parser.getDetails();
 
 //	    try {
-//			map = new Map(INPUT_FILE);
+//			map = new Roads(INPUT_FILE);
 //		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
 //		}

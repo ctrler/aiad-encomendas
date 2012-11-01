@@ -8,16 +8,16 @@ import java.util.Random;
 
 import feups.map.Cell;
 import feups.map.City;
-import feups.map.Map;
+import feups.map.Roads;
 import feups.map.Path;
 import feups.map.Road;
 
 
 public class AutoPilot {
 	
-	private Map map;
+	private Roads map;
 	
-	public AutoPilot(Map map){
+	public AutoPilot(Roads map){
 		this.map = map;
 	}
 	

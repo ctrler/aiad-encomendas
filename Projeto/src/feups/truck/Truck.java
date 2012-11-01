@@ -1,6 +1,7 @@
 package feups.truck;
 
 import java.util.LinkedList;
+import java.util.Set;
 
 import feups.map.Parcel;
 import feups.map.Position;
@@ -16,7 +17,7 @@ import feups.map.Position;
  */
 public class Truck {
 	
-	LinkedList<Parcel> parcels;
+	Set<Parcel> parcels;
 	Position currentPosition;
 	
 	/** Constructor that takes the position of the truck;
@@ -24,6 +25,12 @@ public class Truck {
 	 */
 	public Truck(Position pos){
 		this.currentPosition = pos;
+	}
+	
+	public boolean addParcel(Parcel p){
+		
+		return parcels.add(p);
+		
 	}
 
 }

@@ -1,6 +1,7 @@
 package feups.parcel;
 
-import feups.map.City;
+import feups.city.City;
+import feups.map.Position;
 
 /**
  * A parcel to be delivered.
@@ -10,6 +11,16 @@ import feups.map.City;
  */
 public class Parcel {
 	String name;
+	Position position;
 	City destination;
+	
+	
+	public Parcel(String name, Position position, City destination) {
+		this.name = name;
+		this.position = position;
+		this.destination = destination;
+	}
+	
+	
 
 }
