@@ -1,6 +1,6 @@
 {
     "name": "test map",
-    "map": "example1.map",
+    "map": "newmap.map",
     "cities": [
         {
             "name": "Vila do Conde",

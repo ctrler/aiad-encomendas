@@ -24,23 +24,24 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Main main = new Main(); //TODO why is this used?
-	}
-	
-	public Main() {
+
+		World world = new World();
+		
 		System.out.println("The file will now be loaded!\n");
 		
-		Parser parser = new Parser();
+		Parser parser = new Parser(world);
+		if (parser.getDetails())
+			System.out.println("Parsing OK");
+		else
+			System.out.println("Parsing FAIL");
 		
-		parser.getDetails();
-
 //	    try {
 //			map = new Roads(INPUT_FILE);
 //		} catch (FileNotFoundException e) {
 //			e.printStackTrace();
 //		}
 //	    play_ia();
-		//System.out.println(map.print());
+//		System.out.println(map.print());
 	}
 	
 	private void play_ia() {

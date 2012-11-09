@@ -1,9 +1,10 @@
 package feups.truck;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import feups.map.Parcel;
+import feups.parcel.Parcel;
 import feups.map.Position;
 
 /**
@@ -25,12 +26,29 @@ public class Truck {
 	 */
 	public Truck(Position pos){
 		this.currentPosition = pos;
+		parcels = new HashSet<Parcel>();
+		
 	}
 	
 	public boolean addParcel(Parcel p){
-		
 		return parcels.add(p);
-		
 	}
 
+	public Set<Parcel> getParcels() {
+		return parcels;
+	}
+
+	public void setParcels(Set<Parcel> parcels) {
+		this.parcels = parcels;
+	}
+
+	public Position getCurrentPosition() {
+		return currentPosition;
+	}
+
+	public void setCurrentPosition(Position currentPosition) {
+		this.currentPosition = currentPosition;
+	}
+
+	
 }

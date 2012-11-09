@@ -76,7 +76,6 @@ public class World {
 		}
 		else
 			return false; // truck already exists
-		
 	}
 	
 	/**
