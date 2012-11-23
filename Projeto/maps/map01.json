@@ -1,10 +1,10 @@
 {
     "name": "test map",
-    "map": "newmap.map",
+    "map": "maps/newmap.map",
     "cities": [
         {
             "name": "Vila do Conde",
-            "position": { "x": 1, "y": 0 }
+            "position": { "x": 1, "y": 1 }
         },
         {
             "name": "Porto", 

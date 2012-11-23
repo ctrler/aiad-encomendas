@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import feups.city.City;
+
 public class Roads {
 	
 	private ArrayList<ArrayList<Cell>> map;
@@ -29,6 +31,10 @@ public class Roads {
 		this.load(lines);
 	}
 	
+	public ArrayList<ArrayList<Cell>> getMap(){
+		return this.map;
+	}
+	
 	public Cell getXY(int x, int y){
 		return map.get(y - 1).get(x - 1);
 	}
@@ -47,6 +53,7 @@ public class Roads {
 	public int getHeight() {
 		return map.size();
 	}
+	
 	
 	private void load(String path) throws FileNotFoundException{
 		BufferedReader in = new BufferedReader(new FileReader(path));
@@ -78,14 +85,6 @@ public class Roads {
 				case '#':
 					map.get(x).add(new Road());
 					break;
-				case 'T':
-					map.get(x).add(new Truck());
-					trucks++;
-					break;
-				case 'X':
-					map.get(x).add(new City());
-					cities++;
-					break;
 				case ' ':
 					map.get(x).add(new Empty());
 					break;
@@ -115,6 +114,7 @@ public class Roads {
 	}
 	
 	public String print() {
+		
 		String output = "";
 		for(int y = 1; y <= getHeight(); y++) {
 			String output_line = "";

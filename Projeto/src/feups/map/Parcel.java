@@ -1,5 +1,7 @@
 package feups.map;
 
+import feups.city.City;
+
 public class Parcel implements Cell {
 	
 public static char IDENTIFIER = 'P';

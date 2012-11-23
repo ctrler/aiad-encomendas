@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>Projeto</groupId>
 	<artifactId>Projeto</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>4.0.0</version>
 
 	<dependencies>
 		<dependency>
@@ -12,13 +12,7 @@
 			<version>20041127.091804</version>
 		</dependency>
 		<!-- Local dependency for jade -->
-		<dependency>
-		    <groupId>com.tilab.jade</groupId>
-		    <artifactId>jade</artifactId>
-		    <version>4.2.0</version>
-		    <!-- <scope>system</scope> -->
-		    <!-- <systemPath>${project.basedir}/lib/jade.jar</systemPath> -->
-		</dependency>
+		
 		
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
