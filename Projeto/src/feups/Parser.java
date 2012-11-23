@@ -78,7 +78,7 @@ public class Parser {
 	        System.out.println("\t x=" + pos_x + " y=" + pos_y);
 	        
 	        // Adiciona a cidade ao mapa.
-	        world.addCity(cityName, new Position(pos_x, pos_y));
+	        world.getMap().addCity(cityName, new Position(pos_x, pos_y));
 	    }
 	    
 	    // Getting parcels
@@ -97,8 +97,8 @@ public class Parser {
 	        String parcelDestination = parcel.getString("destination"); //Parcel Destination
 	        System.out.println("\tDestination: " + parcelDestination);
 	        
-	        City posCity = world.getCity(parcelPosition);
-	        City destCity = world.getCity(parcelDestination);
+	        City posCity = world.getMap().getCity(parcelPosition);
+	        City destCity = world.getMap().getCity(parcelDestination);
 	        
 	        // verifica se ambas as cidades existem
 	        if(posCity == null || destCity == null)
@@ -129,7 +129,7 @@ public class Parser {
 	        
 	        JSONArray truckParcels = truckJSON.getJSONArray("parcels");
 	        
-	        City truckCity = world.getCity(truckPosition);
+	        City truckCity = world.getMap().getCity(truckPosition);
 	        if(truckCity == null) // se cidade nao existir
 	        	return false;
 	        
@@ -153,6 +153,9 @@ public class Parser {
 	    }
 	    
 	    System.out.println(world.printRoads(world.roads));
+	   
+	    world.testAutopilot();
+	    
 	    
 	    System.out.println("Name is '" + mapName + "' and map file is '" + mapFileName + "'");
 	    return true;
