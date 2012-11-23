@@ -18,7 +18,7 @@ public class Main {
 	public static final String INPUT_FILE = "maps/example1.map";
 
 	//Initialization of the map
-	private Roads map;
+	private static Roads map;
 	
 	/**
 	 * @param args
@@ -34,17 +34,18 @@ public class Main {
 			System.out.println("Parsing OK");
 		else
 			System.out.println("Parsing FAIL");
-		
-//	    try {
-//			map = new Roads(INPUT_FILE);
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-//	    play_ia();
-//		System.out.println(map.print());
+		/*
+		try {
+			map = new Roads(INPUT_FILE);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		play_ia();
+		System.out.println(map.print());
+		*/
 	}
 	
-	private void play_ia() {
+	private static void play_ia() {
 		System.out.println("feups.map for ia");
 		System.out.println(map.print());
 		AutoPilot autoPilot = new AutoPilot(map);
@@ -61,7 +62,7 @@ public class Main {
 		
 	}
 	
-	private String play_ia_walk(Point truckPosition, Path path) {
+	private static String play_ia_walk(Point truckPosition, Path path) {
 		String path_str = ""; 
 		for (Point point : path.getPath()) {
 			String input = AutoPilot.getDirection(truckPosition, point);

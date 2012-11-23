@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
+import feups.city.City;
 import feups.map.Cell;
-import feups.map.City;
 import feups.map.Roads;
 import feups.map.Path;
 import feups.map.Road;

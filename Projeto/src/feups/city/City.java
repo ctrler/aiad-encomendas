@@ -1,5 +1,6 @@
 package feups.city;
 
+import feups.map.Cell;
 import feups.map.Position;
 
 /**
@@ -7,7 +8,7 @@ import feups.map.Position;
  * @author Ricardo Teixeira
  *
  */
-public class City {
+public class City implements Cell {
 	
 	String nome;
 	Position position;
@@ -32,6 +33,11 @@ public class City {
 
 	public void setPosition(Position position) {
 		this.position = position;
+	}
+
+	@Override
+	public String print() {
+		return "X";
 	}
 	
 	

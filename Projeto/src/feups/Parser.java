@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 
 import feups.city.City;
 import feups.parcel.Parcel;
+import feups.map.Cell;
 import feups.map.Position;
 import feups.truck.Truck;
 
@@ -55,8 +56,11 @@ public class Parser {
 		if(json==null)
 			return false;
 		
-	    String name = json.getString( "name" );
-	    String mapFile = json.getString( "map" );
+		// Getting the map of Roads
+	    String mapName = json.getString( "name" );
+	    String mapFileName = json.getString("map");
+	    world.addMap(mapName, mapFileName);
+	    
 	    
 	    // Getting cities
 	    System.out.println("\n##### CITIES #####");
@@ -75,6 +79,8 @@ public class Parser {
 	        
 	        // Adiciona a cidade ao mapa.
 	        world.addCity(cityName, new Position(pos_x, pos_y));
+	        Cell cityTemp = (Cell) world.getCity(cityName);
+	        world.getMap(mapName).setXY(pos_x, pos_y, cityTemp);
 	    }
 	    
 	    // Getting parcels
@@ -147,7 +153,9 @@ public class Parser {
 	        world.addTruck(truckName, truck);
 	    }
 	    
-	    System.out.println("Name is " + name + " and map file is " + mapFile);
+	    System.out.println(world.printRoads(world.roads));
+	    
+	    System.out.println("Name is '" + mapName + "' and map file is '" + mapFileName + "'");
 	    return true;
 	}
 }
