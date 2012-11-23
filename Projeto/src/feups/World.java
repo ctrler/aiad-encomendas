@@ -11,13 +11,18 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
+import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import feups.ia.AutoPilot;
 import feups.map.Cell;
+import feups.map.EndOfMapException;
+import feups.map.Path;
 import feups.map.Position;
 import feups.map.Roads;
 import feups.parcel.Parcel;
@@ -33,10 +38,10 @@ import feups.truck.Truck;
 public class World extends Agent{
 	
 	/* This is used so we can get a state of the system at any
-	 * given time. */
+	 * given time. 
+	 */
 	Roads roads;
 	HashMap<String,Truck> trucks;
-	HashMap<String,City> cities;
 	HashMap<String,Parcel> parcels;
 	
 	/**
@@ -44,10 +49,46 @@ public class World extends Agent{
 	 */
 	public World(){
 		this.trucks = new HashMap<String,Truck>();
-		this.cities = new HashMap<String,City>();
 		this.parcels = new HashMap<String,Parcel>();
+		//this.testAutopilot();
 	}
 	
+	public void testAutopilot() {
+		AutoPilot autoPilot = new AutoPilot(this.getMap());
+		
+		String path_str = "";
+		while(!this.getMap().getDeliveries().isEmpty()){
+			LinkedList<Point> destinations = this.getMap().getDeliveries();
+			Point truckPosition = this.getMap().convert0BasedTo1Based(this.getMap().getTruckPosition());
+			Path path = autoPilot.getPath(truckPosition, destinations);
+			path_str += play_ia_walk(truckPosition, path);
+		}
+		
+		System.out.println("[Action] " + path_str);
+	}
+
+	public String play_ia_walk(Point truckPosition, Path path) {
+		String path_str = ""; 
+		for (Point point : path.getPath()) {
+			String input = AutoPilot.getDirection(truckPosition, point);
+			System.out.println("Direction: " + input);
+			System.out.println("TruckX: " + truckPosition.getX() + "TruckY: " + truckPosition.getY());
+			System.out.println("DestinationX: " + point.getX() + "DestinationY: " + truckPosition.getY());
+			path_str += input + "";
+			
+			try {
+				this.getMap().makeMove(input);
+				//map.update();
+			} catch (EndOfMapException e) {
+				System.out.println(e.getMessage());
+				
+			}
+			truckPosition = point;
+			System.out.println(this.getMap().print());
+		}
+		return path_str;
+	}
+
 	/**
 	 * Adds the map to the world
 	 * @param mapName
@@ -146,9 +187,9 @@ public class World extends Agent{
 	/**
 	 * Gets the map by name
 	 * @param name
-	 * @return
+	 * @return Map of Roads
 	 */
-	public Roads getMap(String name){
+	public Roads getMap(){
 		return this.roads;
 	}
 	
@@ -159,97 +200,14 @@ public class World extends Agent{
 		for(int y = 1; y <= roads.getHeight(); y++) {
 			String output_line = "";
 			for(int x = 1; x <= roads.getWidth(); x++) {
-				
-				/*int x1 = 0;
-				int y1 = 0;
-				Cell cell = null;
-				
-				//Cheking Cities
-				Iterator iter = cities.keySet().iterator();
-				while(iter.hasNext()) {
-	
-					String key = (String)iter.next();
-			
-					x1 = (int)cities.get(key).getPosition().getX();
-					y1 = (int)cities.get(key).getPosition().getY();
-					System.out.println("X1: " + x1 + ", Y1: " + y1);
-					
-					System.out.println("X: " + x + ", Y: " + y);
-					System.out.println("--");
-					
-					if(x1 == x && y1 == y){
-						System.out.println("CHEGOU AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
-						output_line += "X";
-					}
-					else{
-						cell = roads.getXY(x, y);
-						
-					}
-					
-				}*/
-				
-				//output_line += cell.print();
-				Cell cell = roads.getXY(x, y);
-				output_line += cell.print();
-				//output_line += printCell(x, y);
+				String cell = roads.getXY(x, y);
+				output_line += cell;
 			}
 			output = output_line + "\n" + output;
 		}
 		
 		return output;
 		
-	}
-	
-	private String printCell(int x, int y) {
-		
-		String cell = "";
-		//Checking cities place
-		
-		Iterator iter = cities.keySet().iterator();
-		while(iter.hasNext()) {
-
-			String key = (String)iter.next();
-	
-			int x1 = (int)cities.get(key).getPosition().getX();
-			int y1 = (int)cities.get(key).getPosition().getY();
-	
-			if(x1 == x || y1 == y)
-				cell = "T";
-			else
-				cell = "#";
-			//System.out.println("key, x, y: " + key + "," + x1 + "," + y1);
-		}
-		
-		return cell;
-	}
-
-	/**
-	 * Adds a city to the world.
-	 * @param name The name of the city
-	 * @param p Position
-	 * @return true if insert ok, false otherwise
-	 * FIXME change to add a city as Roads.addCity();
-	 */
-	public boolean addCity(String name, Position p){
-		
-		City city = new City(name, p);
-		
-		if(!cities.containsKey(name)){
-			cities.put(name, city);
-			return true;
-		}
-		else
-			return false; // city already exists
-	}
-	
-	/**
-	 * Gets a city by name.
-	 * @param name City name
-	 * @return City if city exits, null otherwise
-	 * FIXME change to add a get a city Roads.addCity();
-	 */
-	public City getCity(String name){
-		return cities.get(name);
 	}
 	
 	
@@ -262,6 +220,12 @@ public class World extends Agent{
 		return trucks.get(name);
 	}
 	
+	/**
+	 * Adds a truck
+	 * @param name
+	 * @param truck
+	 * @return
+	 */
 	public boolean addTruck(String name, Truck truck){
 			
 		if(!trucks.containsKey(name)){

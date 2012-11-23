@@ -21,8 +21,8 @@ public class AutoPilot {
 		this.map = map;
 	}
 	
-	private boolean isWalkable(Cell cell){
-		return (cell instanceof Road || cell instanceof City);
+	private boolean isWalkable(String left){
+		return (left == "#" || left =="X");
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class AutoPilot {
 			openPoints.getPath().clear();
 
 			
-			Cell left = null, down = null, up = null, right = null; 
+			String left = null, down = null, up = null, right = null; 
 			try{
 				left = map.getXY(minDistancePoint.x - 1, minDistancePoint.y);
 				left = isWalkable(left) ? left : null;
