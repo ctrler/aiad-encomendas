@@ -142,6 +142,7 @@ public class Parser {
 	        	if(p==null) // retorna falso caso parcel nao exista
 	        		return false;
 	        	
+	        	// I add this parcel to truck.
 	        	truck.addParcel(p);
 	        }
 	        world.addTruck(truckName, truck);
