@@ -28,12 +28,9 @@ public class Main {
 		World world = new World();
 		
 		System.out.println("The file will now be loaded!\n");
+
+		// Programmers guide secção 3.8
 		
-		Parser parser = new Parser(world);
-		if (parser.getDetails())
-			System.out.println("Parsing OK");
-		else
-			System.out.println("Parsing FAIL");
 		/*
 		try {
 			map = new Roads(INPUT_FILE);

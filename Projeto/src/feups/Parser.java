@@ -79,8 +79,6 @@ public class Parser {
 	        
 	        // Adiciona a cidade ao mapa.
 	        world.addCity(cityName, new Position(pos_x, pos_y));
-	        Cell cityTemp = (Cell) world.getCity(cityName);
-	        world.getMap(mapName).setXY(pos_x, pos_y, cityTemp);
 	    }
 	    
 	    // Getting parcels

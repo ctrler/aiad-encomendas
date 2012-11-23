@@ -1,5 +1,6 @@
 package feups;
 
+import jade.core.AID;
 import jade.core.Agent;
 
 import jade.core.behaviours.SimpleBehaviour;
@@ -10,6 +11,8 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -129,6 +132,17 @@ public class World extends Agent{
 			
 			//FIXME Load each and every truck
 			/* From here on we load the trucks spawning an truck agent for every truck. */
+			AID t1AID = new AID("teste",AID.ISLOCALNAME);
+			TruckAgent t1 = new TruckAgent(t1AID,0);
+			AgentController a;
+			try {
+				a = this.getContainerController().acceptNewAgent("teste123", t1);
+				a.start();
+				
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} 
 
