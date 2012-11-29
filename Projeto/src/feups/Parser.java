@@ -154,9 +154,6 @@ public class Parser {
 	    
 	    System.out.println(world.printRoads(world.roads));
 	   
-	    world.testAutopilot();
-	    
-	    
 	    System.out.println("Name is '" + mapName + "' and map file is '" + mapFileName + "'");
 	    return true;
 	}
