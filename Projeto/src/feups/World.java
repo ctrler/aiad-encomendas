@@ -116,10 +116,9 @@ public class World extends Agent{
 			super(a);
 		}
 
-		/** Sends and receives messages from trucks
+		/** Envia e recebe as mensagens dos trucks.
 		 */
 		public void action() {
-			System.out.println("World à escuta");
 			ACLMessage msg = blockingReceive();
 			if (msg.getPerformative() == ACLMessage.INFORM) {
 				System.out.println(++n + " " + getLocalName() + ": recebi "
@@ -127,11 +126,7 @@ public class World extends Agent{
 				// cria resposta
 				ACLMessage reply = msg.createReply();
 				// preenche conteúdo da mensagem
-				if (msg.getContent().equals("ping"))
-					reply.setContent("pong");
-				else
-					reply.setContent("ping");
-				// envia mensagem
+				reply.setContent("Mensagem recebida. Toca a trabalhar!");
 				send(reply);
 			}
 		}
