@@ -1,5 +1,6 @@
 package feups;
 
+import jade.core.AID;
 import jade.core.Agent;
 
 import jade.core.behaviours.SimpleBehaviour;
@@ -10,6 +11,8 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
 import java.io.FileNotFoundException;
@@ -75,10 +78,9 @@ public class World extends Agent{
 			super(a);
 		}
 
-		/** Sends and receives messages from trucks
+		/** Envia e recebe as mensagens dos trucks.
 		 */
 		public void action() {
-			System.out.println("World à escuta");
 			ACLMessage msg = blockingReceive();
 			if (msg.getPerformative() == ACLMessage.INFORM) {
 				System.out.println(++n + " " + getLocalName() + ": recebi "
@@ -86,11 +88,7 @@ public class World extends Agent{
 				// cria resposta
 				ACLMessage reply = msg.createReply();
 				// preenche conteúdo da mensagem
-				if (msg.getContent().equals("ping"))
-					reply.setContent("pong");
-				else
-					reply.setContent("ping");
-				// envia mensagem
+				reply.setContent("Mensagem recebida. Toca a trabalhar!");
 				send(reply);
 			}
 		}
@@ -130,8 +128,28 @@ public class World extends Agent{
 			else
 				System.out.println("Parsing FAIL");
 			
-			//FIXME Load each and every truck
-			/* From here on we load the trucks spawning an truck agent for every truck. */
+			
+			/* LOAD TRUCKS
+			 * From here on we load the trucks 
+			 * spawning an truck agent for every truck. 
+			 * We add the truck to the controller and start it.
+			 */
+			for(String truckName : trucks.keySet() ){
+							
+				TruckAgent t = new TruckAgent();
+				
+				AgentController agentController;
+				try {
+					agentController = this.getContainerController().acceptNewAgent(truckName, t);
+					agentController.start();
+					
+				} catch (StaleProxyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+
 			
 		} 
 
