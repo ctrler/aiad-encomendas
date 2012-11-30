@@ -2,6 +2,7 @@ package feups.communication;
 
 import java.util.List;
 
+import feups.TruckAgent;
 import feups.parcel.Parcel;
 
 
