@@ -20,10 +20,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import feups.ia.AutoPilot;
-import feups.map.Cell;
 import feups.map.EndOfMapException;
 import feups.map.Path;
-import feups.map.Position;
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.city.City;
@@ -40,7 +38,7 @@ public class World extends Agent{
 	/* This is used so we can get a state of the system at any
 	 * given time. 
 	 */
-	Roads roads;
+	static Roads roads;
 	HashMap<String,Truck> trucks;
 	HashMap<String,Parcel> parcels;
 	
@@ -50,44 +48,8 @@ public class World extends Agent{
 	public World(){
 		this.trucks = new HashMap<String,Truck>();
 		this.parcels = new HashMap<String,Parcel>();
-		//this.testAutopilot();
 	}
 	
-	public void testAutopilot() {
-		AutoPilot autoPilot = new AutoPilot(this.getMap());
-		
-		String path_str = "";
-		while(!this.getMap().getDeliveries().isEmpty()){
-			LinkedList<Point> destinations = this.getMap().getDeliveries();
-			Point truckPosition = this.getMap().convert0BasedTo1Based(this.getMap().getTruckPosition());
-			Path path = autoPilot.getPath(truckPosition, destinations);
-			path_str += play_ia_walk(truckPosition, path);
-		}
-		
-		System.out.println("[Action] " + path_str);
-	}
-
-	public String play_ia_walk(Point truckPosition, Path path) {
-		String path_str = ""; 
-		for (Point point : path.getPath()) {
-			String input = AutoPilot.getDirection(truckPosition, point);
-			System.out.println("Direction: " + input);
-			System.out.println("TruckX: " + truckPosition.getX() + "TruckY: " + truckPosition.getY());
-			System.out.println("DestinationX: " + point.getX() + "DestinationY: " + truckPosition.getY());
-			path_str += input + "";
-			
-			try {
-				this.getMap().makeMove(input);
-				//map.update();
-			} catch (EndOfMapException e) {
-				System.out.println(e.getMessage());
-				
-			}
-			truckPosition = point;
-			System.out.println(this.getMap().print());
-		}
-		return path_str;
-	}
 
 	/**
 	 * Adds the map to the world
@@ -193,14 +155,14 @@ public class World extends Agent{
 		return this.roads;
 	}
 	
-	public String printRoads(Roads roads){
+	public String printRoads(){
 		
 		String output = "";
 		String temp = "";
-		for(int y = 1; y <= roads.getHeight(); y++) {
+		for(int y = 1; y <= this.roads.getHeight(); y++) {
 			String output_line = "";
-			for(int x = 1; x <= roads.getWidth(); x++) {
-				String cell = roads.getXY(x, y);
+			for(int x = 1; x <= this.roads.getWidth(); x++) {
+				String cell = this.roads.getXY(x, y);
 				output_line += cell;
 			}
 			output = output_line + "\n" + output;
@@ -227,9 +189,10 @@ public class World extends Agent{
 	 * @return
 	 */
 	public boolean addTruck(String name, Truck truck){
-			
+					
 		if(!trucks.containsKey(name)){
 			trucks.put(name, truck);
+			this.getMap().setXY(truck.getCurrentPosition().getX(), truck.getCurrentPosition().getY(), "T");
 			return true;
 		}
 		else
@@ -252,15 +215,24 @@ public class World extends Agent{
 	 * @param destination
 	 * @return
 	 */
-	public boolean addParcel(String name, Position p, City destination){
+	public boolean addParcel(String name, Point p, City destination){
 		Parcel parcel = new Parcel(name,p,destination);
 		
 		if(!parcels.containsKey(name)){
 			parcels.put(name, parcel);
+			this.getMap().setXY(destination.getPosition().getX(), destination.getPosition().getY(), "P");
 			return true;
 		}
 		else
 			return false;
+	}
+
+	/**
+	 * Returns the collection of Trucks
+	 * @return HashMap<String,Truck> trucks;
+	 */
+	public HashMap<String, Truck> getTrucks() {
+		return this.trucks;
 	}
 
 	

@@ -1,19 +1,18 @@
 package feups.city;
 
-import feups.map.Cell;
-import feups.map.Position;
+import java.awt.Point;
 
 /**
  * Stores a city
  * @author Ricardo Teixeira
  *
  */
-public class City implements Cell {
+public class City {
 	
 	String nome;
-	Position position;
+	Point position;
 	
-	public City(String nome, Position p){
+	public City(String nome, Point p){
 		
 		this.position = p;
 		this.nome =nome;
@@ -27,15 +26,15 @@ public class City implements Cell {
 		this.nome = nome;
 	}
 
-	public Position getPosition() {
+	public Point getPosition() {
 		return position;
 	}
 
-	public void setPosition(Position position) {
+	public void setPosition(Point position) {
 		this.position = position;
 	}
-
-	@Override
+	
+	
 	public String print() {
 		return "X";
 	}

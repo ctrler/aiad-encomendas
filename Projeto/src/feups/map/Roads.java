@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import feups.city.City;
+import feups.truck.Truck;
 
 public class Roads {
 	
@@ -42,8 +43,8 @@ public class Roads {
 		return map.get(y - 1).get(x - 1);
 	}
 	
-	public String setXY(int x, int y, String cell){
-		return map.get(y - 1).set(x - 1, cell);
+	public String setXY(double d, double e, String cell){
+		return map.get((int) (e - 1)).set((int) (d - 1), cell);
 	}
 	
 	public int getWidth() {
@@ -131,95 +132,18 @@ public class Roads {
 		return output;
 	}
 	
-public boolean makeMove(String direction) throws EndOfMapException{
-		
-		Point truckPosition = getTruckPosition();
-		String truck = (String)getXY(truckPosition.x+1, truckPosition.y+1);
-		
-		Point destination = null;
-		
-		switch (direction.toLowerCase()){
-			case "u":
-				destination =  new Point(truckPosition.x, truckPosition.y+1);
-				break;
-			case "l":
-				destination =  new Point(truckPosition.x-1, truckPosition.y);
-				break;
-			case "d":
-				destination =  new Point(truckPosition.x, truckPosition.y-1);
-				break;
-			case "r":
-				destination =  new Point(truckPosition.x+1, truckPosition.y);
-				break;
-			case "w":
-				return true;
-			case "a":
-				//throw new EndOfMapException("You aborted the city-finding activity. Score: " + truck.getFinalScore());
-			default:
-				return false;
-		}
-		
-		String object = map.get(destination.y).get(destination.x);
-		
-		if(object == "X"){
-			map.get(truckPosition.y).set(truckPosition.x, "#");
-			map.get(destination.y).set(destination.x, truck);
-			//truck.addStep();
-			//System.out.println("Congratulations, package delivered! Score: " + truck.getFinalScore());
-			
-			//TODO: Remove Sleep
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//throw new EndOfMapException("Congratulations, package delivered! Score: " + truck.getFinalScore());
-			// mudar de mapa
-			return true;
-		}
-		else if(object == "#"){
-			map.get(truckPosition.y).set(truckPosition.x, "#");
-			map.get(destination.y).set(destination.x, truck);
-			//truck.addStep();
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public Point getTruckPosition(){
-		for(int i=0; i < map.size(); i++)
-			for(int j=0; j < map.get(i).size(); j++){
-				if(map.get(i).get(j) == "T")
-					return new Point(j,i);
-			}
-		return null;
-	}
 	
 	public Point convert0BasedTo1Based(Point p){
 		return new Point(p.x + 1, p.y + 1);
 	}
 	
-	public LinkedList<Point> getDeliveries(){
-		LinkedList<Point> temp = new LinkedList<Point>();
-		
-		for(int y = 1; y <= getHeight(); y++){
-			for(int x = 1; x <= getWidth(); x++){
-				if(getXY(x, y) == "X")
-					temp.add(new Point(x, y));
-			}
-		}
-		return temp;
-	}
-
 	/**
 	 * Adds a city to the world.
 	 * @param name The name of the city
 	 * @param p Position
 	 * @return true if insert ok, false otherwise
 	 */
-	public boolean addCity(String cityName, Position position) {
+	public boolean addCity(String cityName, Point position) {
 		City city = new City(cityName, position);
 		
 		if(!cities.containsKey(cityName)){

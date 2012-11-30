@@ -17,23 +17,35 @@
         {
             "name": "Viana do Castelo",
             "position": { "x": 5, "y": 9 }
+        },
+        {
+            "name": "Braga",
+            "position": { "x": 6, "y": 3 }
+        },
+        {
+            "name": "Espinho",
+            "position": { "x": 2, "y": 5 }
+        },
+        {
+            "name": "Guarda",
+            "position": { "x": 2, "y": 9 }
         }
     ],
     "parcels": [
         {
             "name": "parcel0",
-            "position": "Vila do Conde",
+            "position": "Braga",
             "destination": "Viana do Castelo"
         },
         {
             "name": "parcel1",
-            "position": "Viana do Castelo",
-            "destination": "Vila do Conde"
+            "position": "Espinho",
+            "destination": "Braga"
         },
         {
             "name": "parcel2",
-            "position": "Porto",
-            "destination": "Vila do Conde"
+            "position": "Guarda",
+            "destination": "Espinho"
         },
         {
             "name": "parcel3",
@@ -46,10 +58,10 @@
             "name": "truck0",
             "parcels": [
                 {
-                    "name": "parcel2"
+                    "name": "parcel0"
                 },
                 {
-                    "name": "parcel3"
+                    "name": "parcel1"
                 }
             ],
             "position": "Póvoa de Varzim"
@@ -58,10 +70,13 @@
             "name": "truck1",
             "parcels": [
                 {
-                    "name": "parcel1"
+                    "name": "parcel3"
+                },
+                {
+                    "name": "parcel2"
                 }
             ],
-            "position": "Vila do Conde"
+            "position": "Espinho"
         }
     ]
 }

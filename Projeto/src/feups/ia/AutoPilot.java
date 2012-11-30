@@ -7,10 +7,8 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import feups.city.City;
-import feups.map.Cell;
 import feups.map.Roads;
 import feups.map.Path;
-import feups.map.Road;
 
 
 public class AutoPilot {
@@ -22,7 +20,7 @@ public class AutoPilot {
 	}
 	
 	private boolean isWalkable(String left){
-		return (left == "#" || left =="X");
+		return (left == "#" || left =="X" || left == "T" || left == "P");
 	}
 	
 	/**
@@ -79,12 +77,12 @@ public class AutoPilot {
 		/*
 		 * Get the path from origin to destination
 		 */
-		System.out.println("origin: " + origin + " - destination: " + destination);
+		System.out.println("\t\t(" + origin.getX() + ", " + origin.getY() + ") - (" + destination.getX() + ", " + destination.getY() + ")");
 		path = this.getPathAux(openPoints, closedPoints, origin, destination);
 		
 		/* Print */
 		for (Point point : path.getPath()) {
-			System.out.println("PATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + point.getX() + ":" + point.getY());
+			System.out.println("\t\tPATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + point.getX() + ":" + point.getY());
 		}
 		
 		if (path.getPath().size() >= 2) {
@@ -112,7 +110,7 @@ public class AutoPilot {
 		while(currentPoint.distance(destination) != 0){
 			
 			if (openPoints.getPath().isEmpty()) {
-				//System.out.println("openPoints.isEmpty");
+				System.out.println("[ERROR] Impossible to calculate route due to inexistent Paths.");
 				return new Path();
 			}
 			

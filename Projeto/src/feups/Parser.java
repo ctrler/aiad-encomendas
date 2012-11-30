@@ -1,5 +1,6 @@
 package feups;
 
+import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -7,8 +8,6 @@ import org.apache.commons.io.IOUtils;
 
 import feups.city.City;
 import feups.parcel.Parcel;
-import feups.map.Cell;
-import feups.map.Position;
 import feups.truck.Truck;
 
 import net.sf.json.JSONArray;
@@ -78,7 +77,7 @@ public class Parser {
 	        System.out.println("\t x=" + pos_x + " y=" + pos_y);
 	        
 	        // Adiciona a cidade ao mapa.
-	        world.getMap().addCity(cityName, new Position(pos_x, pos_y));
+	        world.getMap().addCity(cityName, new Point(pos_x, pos_y));
 	    }
 	    
 	    // Getting parcels
@@ -104,7 +103,7 @@ public class Parser {
 	        if(posCity == null || destCity == null)
 	        	return false;
 	        
-	        // adiciona a cidade ao world
+	        // adiciona a encomenda ao world
 	        boolean result = world.addParcel(parcelName, posCity.getPosition(), destCity);
 	        
 	        if(!result)
@@ -152,9 +151,9 @@ public class Parser {
 	        world.addTruck(truckName, truck);
 	    }
 	    
-	    System.out.println(world.printRoads(world.roads));
+	    System.out.println(world.printRoads());
 	   
-	    world.testAutopilot();
+	    //world.testAutopilot();
 	    
 	    
 	    System.out.println("Name is '" + mapName + "' and map file is '" + mapFileName + "'");

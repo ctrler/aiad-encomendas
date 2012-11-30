@@ -1,7 +1,8 @@
 package feups.parcel;
 
+import java.awt.Point;
+
 import feups.city.City;
-import feups.map.Position;
 
 /**
  * A parcel to be delivered.
@@ -11,14 +12,34 @@ import feups.map.Position;
  */
 public class Parcel {
 	String name;
-	Position position;
+	Point position;
 	City destination;
 	
 	
-	public Parcel(String name, Position position, City destination) {
+	public Parcel(String name, Point p, City destination) {
 		this.name = name;
-		this.position = position;
+		this.position = p;
 		this.destination = destination;
+	}
+	
+	public String getNome(){
+		return this.name;
+	}
+	
+	public Point getPosition(){
+		return this.position;
+	}
+	
+	public City getDestination(){
+		return destination;
+	}
+
+	/**
+	 * Sets the current position (x, y) for the Parcel
+	 * @param destination
+	 */
+	public void setCurrentPosition(Point destination) {
+		this.position = destination;
 	}
 	
 	

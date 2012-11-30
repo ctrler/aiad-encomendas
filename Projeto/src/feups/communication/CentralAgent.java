@@ -2,7 +2,7 @@ package feups.communication;
 
 import java.util.List;
 
-import feups.map.Parcel;
+import feups.parcel.Parcel;
 
 
 public class CentralAgent {
