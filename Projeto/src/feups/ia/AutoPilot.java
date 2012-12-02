@@ -77,7 +77,7 @@ public class AutoPilot {
 		/*
 		 * Get the path from origin to destination
 		 */
-		System.out.println("\t\t(" + origin.getX() + ", " + origin.getY() + ") - (" + destination.getX() + ", " + destination.getY() + ")");
+		//System.out.println("\t\t(" + origin.getX() + ", " + origin.getY() + ") - (" + destination.getX() + ", " + destination.getY() + ")");
 		path = this.getPathAux(openPoints, closedPoints, origin, destination);
 		
 		/* Print */

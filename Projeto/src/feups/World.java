@@ -2,6 +2,8 @@ package feups;
 
 import jade.core.Agent;
 
+import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
@@ -30,6 +32,11 @@ import feups.truck.Truck;
  */
 
 public class World extends Agent {
+	
+
+	
+
+
 	private static final long serialVersionUID = -6572093365452115398L;
 
 	/*
@@ -47,20 +54,66 @@ public class World extends Agent {
 		this.parcels = new HashMap<String, Parcel>();
 	}
 
+
+	
+
 	/**
-	 * Adds the map to the world
-	 * 
-	 * @param mapName
-	 * @param mapFile
+	 * Sets up the world and launches other agents.
 	 */
-	public void addMap(String mapName, String mapFile) {
+	protected void setup() {
+		// regista agente no DF
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setName(getName());
+		sd.setType("Agente World");
+		dfd.addServices(sd);
 		try {
-			this.roads = new Roads(mapFile);
-		} catch (FileNotFoundException e) {
+			DFService.register(this, dfd);
+		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-	}
 
+		// defines the behaviour
+				
+		//addBehaviour(new CreateTrucks(this));
+		addBehaviour(new CreateParcel(this));
+		addBehaviour(new ReceiveTruckMovement(this));
+		addBehaviour(new SendMsgBehaviour(this));
+		
+
+		/* Loads the world into this agent */
+		Parser parser = new Parser(this);
+		if (parser.getDetails())
+			System.out.println("Parsing OK");
+		else
+			System.out.println("Parsing FAIL");
+
+		/*
+		 * LOAD TRUCKS From here on we load the trucks spawning an truck agent
+		 * for every truck. We add the truck to the controller and start it.
+		 */
+		//TODO: Puts this in his own behaviour
+		for (String truckName : trucks.keySet()) {
+
+			//Builds the TruckAgent
+			TruckAgent t = new TruckAgent(getTruck(truckName), getMap(), getTruck(truckName).getParcels());
+
+			AgentController agentController;
+			try {
+				agentController = getContainerController().acceptNewAgent(
+						truckName, t);
+				agentController.start();
+
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+	
 	/**
 	 * Defines the behaviour of our agent
 	 */
@@ -79,8 +132,8 @@ public class World extends Agent {
 		public void action() {
 			ACLMessage msg = blockingReceive();
 			if (msg.getPerformative() == ACLMessage.INFORM) {
-				System.out.println(++n + " " + getLocalName() + ": recebi "
-						+ msg.getContent());
+				//System.out.println(++n + " " + getLocalName() + ": recebi "
+						//+ msg.getContent());
 				// // cria resposta
 				// ACLMessage reply = msg.createReply();
 				// // preenche conteúdo da mensagem
@@ -97,7 +150,68 @@ public class World extends Agent {
 			return false;
 		}
 	}
+	
+	/**
+	 * Used to Launch new Parcels in the World
+	 * @author Joca
+	 *
+	 */
+	public class CreateParcel extends Behaviour {
 
+		public CreateParcel() {
+			// TODO Auto-generated constructor stub
+		}
+
+		public CreateParcel(Agent a) {
+			super(a);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public boolean done() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+	}
+
+	/**
+	 * Used to Receive Truck Movements and updating the 
+	 * general state of the World
+	 * @author Joca
+	 *
+	 */
+	public class ReceiveTruckMovement extends Behaviour {
+
+		public ReceiveTruckMovement() {
+			// TODO Auto-generated constructor stub
+		}
+
+		public ReceiveTruckMovement(Agent a) {
+			super(a);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public boolean done() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+	}
+	
 	/**
 	 * Para enviar mensagens de tempos a tempos de forma a testar os trucks Mais
 	 * em: http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer6.html#6.6.4
@@ -122,7 +236,7 @@ public class World extends Agent {
 											// deste tipo
 			template.addServices(sd1);
 
-			// Envia a mensagem ao world
+			// Envia a mensagem para os trucks
 			try {
 				DFAgentDescription[] result = DFService.search(this.myAgent,
 						template);
@@ -132,65 +246,25 @@ public class World extends Agent {
 					msg.addReceiver(result[i].getName()); // Envia uma mensagem
 															// para multiplos
 															// destinos
-				msg.setContent("Olá Sr. camionista.");
+				msg.setContent("mensagem de 5 em 5 segundos");
 
 				send(msg);
 			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
-		}
-
-	}
-
-	/**
-	 * Sets up the world and launches other agents.
-	 */
-	protected void setup() {
-		// regista agente no DF
-		DFAgentDescription dfd = new DFAgentDescription();
-		dfd.setName(getAID());
-		ServiceDescription sd = new ServiceDescription();
-		sd.setName(getName());
-		sd.setType("Agente World");
-		dfd.addServices(sd);
-		try {
-			DFService.register(this, dfd);
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
-
-		// defines the behaviour
-
-		// WorldBehaviour b = new WorldBehaviour(this);
-		// addBehaviour(b);
-		addBehaviour(new SendMsgBehaviour(this));
-
-		/* Loads the world into this agent */
-		Parser parser = new Parser(this);
-		if (parser.getDetails())
-			System.out.println("Parsing OK");
-		else
-			System.out.println("Parsing FAIL");
-
-		/*
-		 * LOAD TRUCKS From here on we load the trucks spawning an truck agent
-		 * for every truck. We add the truck to the controller and start it.
-		 */
-		for (String truckName : trucks.keySet()) {
-
-			TruckAgent t = new TruckAgent();
-
-			AgentController agentController;
-			try {
-				agentController = this.getContainerController().acceptNewAgent(
-						truckName, t);
-				agentController.start();
-
-			} catch (StaleProxyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			
+			// Recebe a resposta vinda dos trucks
+			ACLMessage msg = receive();
+			if (msg != null) {
+				if (msg.getPerformative() == ACLMessage.INFORM) {
+					if(!msg.getContent().equals("READY")){
+						System.out.println("TRUCK NOT READY");
+						done();
+					}
+					System.out.println("<" + getLocalName() + "> [RECEIVED] "
+							+ msg.getContent());
+				}
 			}
-
 		}
 
 	}
@@ -201,6 +275,20 @@ public class World extends Agent {
 		try {
 			DFService.deregister(this);
 		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Adds the map to the world
+	 * 
+	 * @param mapName
+	 * @param mapFile
+	 */
+	public void addMap(String mapName, String mapFile) {
+		try {
+			this.roads = new Roads(mapFile);
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}

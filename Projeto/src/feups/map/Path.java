@@ -21,4 +21,5 @@ public class Path {
 	public LinkedList<Point> getPath(){
 		return this.path;
 	}
+	
 }

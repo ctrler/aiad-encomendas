@@ -102,45 +102,7 @@ public class Truck {
 		return listOfDestinations;
 	}
 	
-	/**
-	 * Moves the Truck to one Specific direction: Left, Right, Up or Down
-	 * @param direction
-	 * @return
-	 * @throws EndOfMapException
-	 */
-	public boolean makeMove(String direction) throws EndOfMapException{
-		
-		Point truckPosition = this.getCurrentPosition();
-		Point destination = null;
-		
-		switch (direction.toLowerCase()){
-			case "u":
-				destination =  new Point(truckPosition.x, truckPosition.y+1);
-				break;
-			case "l":
-				destination =  new Point(truckPosition.x-1, truckPosition.y);
-				break;
-			case "d":
-				destination =  new Point(truckPosition.x, truckPosition.y-1);
-				break;
-			case "r":
-				destination =  new Point(truckPosition.x+1, truckPosition.y);
-				break;
-			case "w":
-				return true;
-			case "a":
-				//throw new EndOfMapException("You aborted the city-finding activity. Score: " + truck.getFinalScore());
-			default:
-				return false;
-		}
-		
-		this.setCurrentPosition(destination);
-		
-		//Moves every parcel inside the truck with it
-		this.makeParcelsInsideMove(destination);
-		
-		return true;
-	}
+	
 
 	/**
 	 * Moves the Parcels inside the truck with it
@@ -154,25 +116,7 @@ public class Truck {
 	    }
 	}
 	
-	/**
-	 * Prints in screen a representation of the Truck and its Parcels
-	 */
-	public void printAllInfo(){
-		System.out.println("------------------------------------------------");
-	    System.out.println("[TruckInfo]");
-	    //System.out.println("TruckName: " + this.);
-	    System.out.println("Position: " + this.getCurrentPosition().toString());
-	    
-	    //Print parcels information
-	    Iterator<Parcel> iter = this.getParcels().iterator();
-	    while (iter.hasNext()) {
-	    	Parcel parc = iter.next();
-	    	System.out.println("\n\t[ParcelInfo]");
-	    	System.out.println("\tName: " + parc.getNome());
-	    	System.out.println("\tOrigin: " + parc.getPosition().toString());
-	    	System.out.println("\tDestination: " + parc.getDestination().getPosition().toString());
-	    }	
-	}
+	
 
 	
 }
