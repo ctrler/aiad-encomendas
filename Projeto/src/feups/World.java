@@ -1,9 +1,9 @@
 package feups;
 
-import jade.core.AID;
 import jade.core.Agent;
 
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 
 import jade.domain.FIPAException;
@@ -17,14 +17,6 @@ import jade.wrapper.StaleProxyException;
 import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import feups.ia.AutoPilot;
-import feups.map.EndOfMapException;
-import feups.map.Path;
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.city.City;
@@ -38,6 +30,7 @@ import feups.truck.Truck;
  */
 
 public class World extends Agent {
+	private static final long serialVersionUID = -6572093365452115398L;
 
 	/*
 	 * This is used so we can get a state of the system at any given time.
@@ -88,11 +81,11 @@ public class World extends Agent {
 			if (msg.getPerformative() == ACLMessage.INFORM) {
 				System.out.println(++n + " " + getLocalName() + ": recebi "
 						+ msg.getContent());
-				// cria resposta
-				ACLMessage reply = msg.createReply();
-				// preenche conteúdo da mensagem
-				reply.setContent("Mensagem recebida. Toca a trabalhar!");
-				send(reply);
+				// // cria resposta
+				// ACLMessage reply = msg.createReply();
+				// // preenche conteúdo da mensagem
+				// reply.setContent("Mensagem recebida. Toca a trabalhar!");
+				// send(reply);
 			}
 		}
 
@@ -103,6 +96,50 @@ public class World extends Agent {
 		public boolean done() {
 			return false;
 		}
+	}
+
+	/**
+	 * Para enviar mensagens de tempos a tempos de forma a testar os trucks Mais
+	 * em: http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer6.html#6.6.4
+	 */
+	class SendMsgBehaviour extends TickerBehaviour {
+		private static final long serialVersionUID = 1837679922616403427L;
+		private int n = 0;
+
+		/** Default constructor */
+		public SendMsgBehaviour(Agent a) {
+			super(a, 5000); // 5000 é o tempo entre cada tick
+		}
+
+		/**
+		 * Envia mensagem ao truck
+		 */
+		public void onTick() {
+			// pesquisa DF por agentes "Agente Truck"
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
+											// deste tipo
+			template.addServices(sd1);
+
+			// Envia a mensagem ao world
+			try {
+				DFAgentDescription[] result = DFService.search(this.myAgent,
+						template);
+				// envia mensagem "pong" inicial a todos os agentes "ping"
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				for (int i = 0; i < result.length; ++i)
+					msg.addReceiver(result[i].getName()); // Envia uma mensagem
+															// para multiplos
+															// destinos
+				msg.setContent("Olá Sr. camionista.");
+
+				send(msg);
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	/**
@@ -123,8 +160,10 @@ public class World extends Agent {
 		}
 
 		// defines the behaviour
-		WorldBehaviour b = new WorldBehaviour(this);
-		addBehaviour(b);
+
+		// WorldBehaviour b = new WorldBehaviour(this);
+		// addBehaviour(b);
+		addBehaviour(new SendMsgBehaviour(this));
 
 		/* Loads the world into this agent */
 		Parser parser = new Parser(this);
