@@ -2,7 +2,9 @@ package feups;
 
 
 import java.awt.Point;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import feups.ia.AutoPilot;
@@ -23,16 +25,44 @@ import jade.lang.acl.ACLMessage;
 
 public class TruckAgent extends Agent {
 	
+	public enum Modo {PARCEL, ENCONTRO};
+	
+	/** Parcels a entregar que nao estao na minha carga*/
 	Set<Parcel> parcels;
+	
+	/** Parcels na minha carga (viajam comigo e sao actualizados sempre que me movo) */
+	Set<Parcel> cargo;
+	
 	private Roads roads; //Used so Truck can navigate in the map
 	Point currentPosition;
+	Parcel currentParcel;
+	AutoPilot autoPilot;
+	
+	/** Rota até ao destino	 */
+	Path currentRoute;
+	
+	/** Destino */
+	Point destination;
+	
+	/** Modo de funcionamento */
+	Modo modoF;
+	
+	/** Distancia percorrida */
+	double km;
 	
 	private static final long serialVersionUID = -4023017875029640114L;
 
-	public TruckAgent(Truck truck, Roads map, Set<Parcel> parcels) {
+	public TruckAgent(Truck truck, Roads map, Set<Parcel> cargo) {
 		this.currentPosition = truck.getCurrentPosition();
 		this.roads = map;
-		this.parcels = parcels;
+		this.parcels = new HashSet<Parcel>();
+		this.currentParcel = null;
+		this.cargo = cargo;
+		this.km = (double) 0.0;
+		
+		
+		this.modoF=Modo.PARCEL;
+		autoPilot = new AutoPilot(roads);
 	}
 
 	protected void setup() {
@@ -53,16 +83,17 @@ public class TruckAgent extends Agent {
 		}
 
 		// pesquisa DF por agentes "Agente World"
-		DFAgentDescription template = new DFAgentDescription();
-		ServiceDescription sd1 = new ServiceDescription();
-		sd1.setType("Agente World");
-		template.addServices(sd1);
-
+//		DFAgentDescription template = new DFAgentDescription();
+//		ServiceDescription sd1 = new ServiceDescription();
+//		sd1.setType("Agente World");
+//		template.addServices(sd1);
+		
+		
 		ParallelBehaviour par = new ParallelBehaviour(
 				ParallelBehaviour.WHEN_ALL);
-		par.addSubBehaviour(new TruckAgentBehaviour(this));
+		//par.addSubBehaviour(new TruckAgentBehaviour(this));
 		par.addSubBehaviour(new DeliveryParcelsBehaviour(this));
-		par.addSubBehaviour(new BehaviourPrintStuff(this));
+		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
 		addBehaviour(par);
 
@@ -118,74 +149,88 @@ public class TruckAgent extends Agent {
 
 		// método action
 		public void onTick() {
-			while(!getParcels().isEmpty()){ //While there's parcels, deliver them
+			
+
+			/* Enviamos uma mensagem ao World a dizer onde estamos
+			 */
+			//TODO
+			
+			/* Actualizamos a localização dos parcels dentro do camião */
+			moveCargo();
+			
+			/* Tentamos obter uma parcel para entregar e caso
+			 * exista carregamos o destino do truck para a origem desse parcel
+			 * Caso já estejamos com o parcel em carga
+			 * ou destinatario dessa parcel 
+			 * e traçamos uma rota até a parcel;
+			 */
+			if(currentParcel==null && modoF == Modo.PARCEL){
+				currentParcel=getNextParcel();
 				
-				AutoPilot autoPilot = new AutoPilot(roads);
-				Point truckPosition = getCurrentPosition();
-				Iterator<Parcel> iter = getParcels().iterator();
-				while (iter.hasNext()) {
-					   Parcel parc = iter.next();
-					   
-					   Point pickupPoint = parc.getPosition();
-					   Point deliveryPoint = parc.getDestination().getPosition();
-					   Path path = autoPilot.getPath(truckPosition, pickupPoint);
-					   Path path2 = autoPilot.getPath(pickupPoint, deliveryPoint);
-					   
-					   String path_str = ""; 
-					   
-					   //Make the Trucks Move from one position to a destination
-					   for (Point point : path.getPath()) {
-						    String input = AutoPilot.getDirection(truckPosition, point);
-							path_str += input + "";
-							
-							try {
-								makeMove(input);
-								//map.update();
-							} catch (EndOfMapException e) {
-								System.out.println(e.getMessage());
-								
-							}
-							truckPosition = point;
-							//System.out.println(roads.print());
-					   }
-					   
-					   //System.out.println("Truck Final Position: " + getCurrentPosition());
-					   //System.out.println("Parcel Final Position: " + pickupPoint);
-					   if(getCurrentPosition().equals(pickupPoint)){
-							System.out.println("Parcel Picked up with sucess at: " + pickupPoint);
-					   }
-					   
-					   //Make the Trucks Move from one position to a destination
-					   for (Point point : path2.getPath()) {
-						    String input = AutoPilot.getDirection(truckPosition, point);
-							path_str += input + "";
-							try {
-								makeMove(input);
-								//map.update();
-							} catch (EndOfMapException e) {
-								System.out.println(e.getMessage());
-								
-							}
-							truckPosition = point;
-							//System.out.println(roads.print());
-					   }
-					   
-					   //System.out.println("Truck Final Position: " + getCurrentPosition());
-					   //System.out.println("Parcel Final Position: " + deliveryPoint);
-					   if(getCurrentPosition().equals(deliveryPoint)){
-						   	//Removes the Parcel from the truck
-						   	iter.remove();
-							System.out.println("Parcel Delivered with sucess at: " + deliveryPoint);
-					   }
+				if(currentParcel!=null){ // Havia parcel para entregar
+					
+					if(currentParcel.getPosition().equals(currentPosition)){ //Parcel já dentro do camião
+						destination = currentParcel.getDestination().getPosition();
+						currentRoute = autoPilot.getPath(currentPosition, destination);
+					}
+					else{ // Vamos buscar parcel
+						//FIXME Implementar esta parte
+					}
+				}
+				
+			}
+			
+			/* Caso chegada ao destino */
+			if(currentPosition.equals(destination)){
+				
+				/* Se estamos a entregar um Parcel que está na Cargo do Truck
+				 */
+				if(destination.equals(currentParcel.getDestination().getPosition())){ // Entregamos o parcel
+					Debug.print(1,this.myAgent.getLocalName() + " ENTREGOU " + currentParcel.getNome() + " Km: " + km);
+					cargo.remove(currentParcel);
+					// Colocamos tudo a null, ele vai tratar de carregar mais um parcel no próximo tick
+					currentRoute = null;
+					destination = null;
+					currentParcel = null;
+				}
+				// FIXME Verificar para situações em que nao estamos a entregar parcels.
+			}
+			
+			/* Caso exista uma parcel para entregar
+			 * ou seja, uma rota a percorrer, 
+			 * comemos a cada tick um bocadinho dessa rota
+			 */
+			if(currentRoute!=null){
+				Debug.print(1, this.myAgent.getLocalName() + " GPS: " + currentPosition.getX() + " " + currentPosition.getY() );
+				
+				Point next = null;
+				try{
+					next = currentRoute.getPath().pop(); // remove o primeiro elemento da lista
+				}catch (NoSuchElementException e){ // lista vazia, nao ha mais pontos
+					Debug.print(0,"LISTA VAZIA");
+					//reset();	// isto volta a executar o onTick() sem fazer o resto.				
+				}
+				
+				if(next!=null){ // caso exista póximo ponto
+					
+					// TODO porque é que precisamos de fazer isto e depois fazer um make move?
+					// estamos a usar o curentPosition aqui e depois o make move volta a utilizar...
+					// Se a Path que temos é um conjunto de pontos SEQUENCIAIS nao basta apenas consumir esses pontos
+					// um a um? Cada um dos pontos a cada tick passa a ser a current position.
+					String input = AutoPilot.getDirection(currentPosition, next);
+					try {
+						makeMove(input);
+					} catch (EndOfMapException e) {
+						Debug.print(0,e.getMessage());
+					}
 				}
 			}
-			//printAllInfo();
 		}
 
 	}
 
 	/**
-	 * Behaviour que imprime coisas
+	 * Behaviour que envia posição actual ao World
 	 * 
 	 */
 	class BehaviourPrintStuff extends TickerBehaviour {
@@ -212,6 +257,18 @@ public class TruckAgent extends Agent {
 		return this.currentPosition;
 	}
 	
+	/** Próxima Parcel a ser entregue;
+	 * @return A parcela mais próxima ou null se já tiverem sido todas entregues;
+	 */
+	Parcel getNextParcel(){
+		if(cargo==null)
+			return null;
+		if(cargo.isEmpty())
+			return null;
+		// FIXME Retornar a Parcel mais próxima e não a primeira;
+		return (Parcel) cargo.toArray()[0];
+	}
+	
 	/**
 	 * Sets the current position (x, y) for the Truck
 	 * @param destination
@@ -229,7 +286,8 @@ public class TruckAgent extends Agent {
 	public boolean makeMove(String direction) throws EndOfMapException{
 		
 		Point truckPosition = this.getCurrentPosition();
-		Point destination = null;
+		Point destination = this.getCurrentPosition();  // Para o caso de cair num "w" ou num "a"?!
+														// nao queremos colocar a currentPosition a null.
 		
 		switch (direction.toLowerCase()){
 			case "u":
@@ -244,14 +302,16 @@ public class TruckAgent extends Agent {
 			case "r":
 				destination =  new Point(truckPosition.x+1, truckPosition.y);
 				break;
-			case "w":
+			case "w": //TODO ?
 				return true;
-			case "a":
+			case "a": // TODO ?
 				//throw new EndOfMapException("You aborted the city-finding activity. Score: " + truck.getFinalScore());
 			default:
 				return false;
 		}
 		
+		km = km+currentPosition.distance(destination);
+		// Corrigi em cima, isto podia colocar a current position a null!
 		this.setCurrentPosition(destination);
 		
 		//Moves every parcel inside the truck with it
@@ -279,4 +339,16 @@ public class TruckAgent extends Agent {
 	    	System.out.println("\tDestination: " + parc.getDestination().getPosition().toString());
 	    }	
 	}
+	
+	/**
+	 * Moves the Parcels inside the truck with it
+	 */
+	private void moveCargo() {
+		Iterator<Parcel> iter = this.cargo.iterator();
+	    while (iter.hasNext()) {
+		    Parcel parc = iter.next();
+		    parc.setCurrentPosition(currentPosition);
+	    }
+	}
+	
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
+import feups.Debug;
 import feups.city.City;
 import feups.map.Roads;
 import feups.map.Path;
@@ -82,7 +83,7 @@ public class AutoPilot {
 		
 		/* Print */
 		for (Point point : path.getPath()) {
-			System.out.println("\t\tPATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + point.getX() + ":" + point.getY());
+			Debug.print(2,"\t\tPATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + point.getX() + ":" + point.getY());
 		}
 		
 		if (path.getPath().size() >= 2) {
@@ -110,7 +111,7 @@ public class AutoPilot {
 		while(currentPoint.distance(destination) != 0){
 			
 			if (openPoints.getPath().isEmpty()) {
-				System.out.println("[ERROR] Impossible to calculate route due to inexistent Paths.");
+				Debug.print(0,"[ERROR] Impossible to calculate route due to inexistent Paths.");
 				return new Path();
 			}
 			
