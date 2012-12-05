@@ -1,0 +1,70 @@
+{
+    "name": "test map",
+    "map": "maps/newmap.map",
+    "cities": [
+        {
+            "name": "Vila do Conde",
+            "position": { "x": 1, "y": 1 }
+        },
+        {
+            "name": "Porto", 
+            "position": {"x": 8,"y": 5 }
+        },
+        {
+            "name": "Póvoa de Varzim",
+            "position": { "x": 5, "y": 5 }
+        },
+        {
+            "name": "Viana do Castelo",
+            "position": { "x": 5, "y": 9 }
+        },
+        {
+            "name": "Braga",
+            "position": { "x": 6, "y": 3 }
+        },
+        {
+            "name": "Espinho",
+            "position": { "x": 2, "y": 5 }
+        },
+        {
+            "name": "Guarda",
+            "position": { "x": 2, "y": 9 }
+        }
+    ],
+    "parcels": [
+        {
+            "name": "parcelBragaViana",
+            "position": "Braga",
+            "destination": "Viana do Castelo"
+        },
+        {
+            "name": "parcelEspinhoBraga",
+            "position": "Espinho",
+            "destination": "Braga"
+        },
+        {
+            "name": "parcelGuardaEspinho",
+            "position": "Guarda",
+            "destination": "Espinho"
+        },
+        {
+            "name": "parcelPovoaPorto",
+            "position": "Póvoa de Varzim",
+            "destination": "Porto"
+        }
+    ],
+    "trucks": [
+        {
+            "name": "truckEspinho",
+            "parcels": [
+                {
+                    "name": "parcelPovoaPorto"
+                },
+                {
+                    "name": "parcelGuardaEspinho"
+                }
+            ],
+            "position": "Espinho"
+        }
+    ]
+}
