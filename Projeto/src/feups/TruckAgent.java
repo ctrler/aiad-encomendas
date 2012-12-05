@@ -2,6 +2,7 @@ package feups;
 
 
 import java.awt.Point;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,6 +15,7 @@ import feups.map.Path;
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.truck.Truck;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
@@ -99,6 +101,37 @@ public class TruckAgent extends Agent {
 		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
 		addBehaviour(par);
+
+	}
+	
+	public class TruckWorldCommunication implements java.io.Serializable {
+		
+		Point currentPosition;
+		/** Distancia percorrida */
+		double km;
+
+		/**
+		 * @param args
+		 */
+		
+		public TruckWorldCommunication (Point currentPosition, double km){
+			this.currentPosition = currentPosition;
+			this.km = km;
+		}
+		
+		
+		public String print() {
+			return ("CurrentPosition: "+this.getCurrentPosition()+" - km: "+this.getKM());
+		}
+		
+		private double getKM() {
+			return this.km;
+		}
+
+
+		public Point getCurrentPosition(){
+			return this.currentPosition;
+		}
 
 	}
 
@@ -204,12 +237,31 @@ public class TruckAgent extends Agent {
 					String input = AutoPilot.getDirection(currentPosition, next);
 					try {
 						makeMove(input);
+						informWorld();
 					} catch (EndOfMapException e) {
 						Debug.print(0,e.getMessage());
 					}
 				}
 			}
 		}
+
+		/**
+		 * Creates the object to be sent to the World with:
+		 * Truck Position, Truck km
+		 */
+		private void informWorld() {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver( new AID("Agent World", AID.ISLOCALNAME));
+			TruckWorldCommunication reg = new TruckWorldCommunication (currentPosition, km);
+			try {
+				msg.setContentObject(reg);
+				msg.setLanguage("JavaSerialization");
+				System.out.println ("Msg send to r1: "+msg);
+				send(msg);
+			}
+			catch (IOException ex) { ex.printStackTrace();}
+		}
+
 	}
 
 	/**
@@ -250,6 +302,7 @@ public class TruckAgent extends Agent {
 			return null;
 		// FIXME Retornar a Parcel mais próxima e não a primeira;
 		Parcel p = (Parcel) cargo.toArray()[0];
+		
 		Debug.print(2,this.getLocalName() + ": Proxima parcel is "+ p.getNome());
 		return p;
 	}
