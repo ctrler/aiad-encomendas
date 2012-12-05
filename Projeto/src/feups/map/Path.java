@@ -21,5 +21,18 @@ public class Path {
 	public LinkedList<Point> getPath(){
 		return this.path;
 	}
+
+	@Override
+	public String toString() {
+		String str = "Path: ";
+		for(Point p : path){
+			str = str.concat(" > " + p.getX() +" " +  p.getY());
+		}
+		str.concat("|");
+		return str;
+		
+	}
+	
+	
 	
 }

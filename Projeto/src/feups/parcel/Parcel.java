@@ -36,10 +36,10 @@ public class Parcel {
 
 	/**
 	 * Sets the current position (x, y) for the Parcel
-	 * @param destination
+	 * @param pos
 	 */
-	public void setCurrentPosition(Point destination) {
-		this.position = destination;
+	public void setCurrentPosition(Point pos) {
+		this.position = pos;
 	}
 	
 	

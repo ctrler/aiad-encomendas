@@ -33,47 +33,47 @@
     ],
     "parcels": [
         {
-            "name": "parcel0",
+            "name": "parcelBragaViana",
             "position": "Braga",
             "destination": "Viana do Castelo"
         },
         {
-            "name": "parcel1",
+            "name": "parcelEspinhoBraga",
             "position": "Espinho",
             "destination": "Braga"
         },
         {
-            "name": "parcel2",
+            "name": "parcelGuardaEspinho",
             "position": "Guarda",
             "destination": "Espinho"
         },
         {
-            "name": "parcel3",
+            "name": "parcelPovoaPorto",
             "position": "Póvoa de Varzim",
             "destination": "Porto"
         }
     ],
     "trucks": [
         {
-            "name": "truck0",
+            "name": "truckPovoa",
             "parcels": [
                 {
-                    "name": "parcel0"
+                    "name": "parcelBragaViana"
                 },
                 {
-                    "name": "parcel1"
+                    "name": "parcelEspinhoBraga"
                 }
             ],
             "position": "Póvoa de Varzim"
         },
         {
-            "name": "truck1",
+            "name": "truckEspinho",
             "parcels": [
                 {
-                    "name": "parcel3"
+                    "name": "parcelPovoaPorto"
                 },
                 {
-                    "name": "parcel2"
+                    "name": "parcelGuardaEspinho"
                 }
             ],
             "position": "Espinho"

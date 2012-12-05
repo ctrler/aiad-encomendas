@@ -4,6 +4,7 @@ package feups;
 import java.awt.Point;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -33,6 +34,8 @@ public class TruckAgent extends Agent {
 	/** Parcels na minha carga (viajam comigo e sao actualizados sempre que me movo) */
 	Set<Parcel> cargo;
 	
+	LinkedList<Parcel> delivered;
+	
 	private Roads roads; //Used so Truck can navigate in the map
 	Point currentPosition;
 	Parcel currentParcel;
@@ -59,7 +62,7 @@ public class TruckAgent extends Agent {
 		this.currentParcel = null;
 		this.cargo = cargo;
 		this.km = (double) 0.0;
-		
+		this.delivered = new LinkedList<Parcel>();
 		
 		this.modoF=Modo.PARCEL;
 		autoPilot = new AutoPilot(roads);
@@ -149,65 +152,46 @@ public class TruckAgent extends Agent {
 
 		// método action
 		public void onTick() {
-			
+			Debug.print(1, this.myAgent.getLocalName() + " \tGPS: " + currentPosition.getX() + " " + currentPosition.getY() + " Destination is " + destination);
 
-			/* Enviamos uma mensagem ao World a dizer onde estamos
+
+			moveCargo(); //Actualizamos a localização dos parcels dentro do camião 
+			checkDelivery(); // Verificamos se existe parcels para entregar
+
+			/* Caso chegada ao destino 
+			 * Limpamos a rota e obtemos uma nova parcel
+			 * caso se esteja em modo Parcel
 			 */
-			//TODO
-			
-			/* Actualizamos a localização dos parcels dentro do camião */
-			moveCargo();
-			
-			/* Tentamos obter uma parcel para entregar e caso
-			 * exista carregamos o destino do truck para a origem desse parcel
-			 * Caso já estejamos com o parcel em carga
-			 * ou destinatario dessa parcel 
-			 * e traçamos uma rota até a parcel;
-			 */
-			if(currentParcel==null && modoF == Modo.PARCEL){
-				currentParcel=getNextParcel();
-				
-				if(currentParcel!=null){ // Havia parcel para entregar
-					
-					if(currentParcel.getPosition().equals(currentPosition)){ //Parcel já dentro do camião
-						destination = currentParcel.getDestination().getPosition();
-						currentRoute = autoPilot.getPath(currentPosition, destination);
-					}
-					else{ // Vamos buscar parcel
-						//FIXME Implementar esta parte
-					}
-				}
-				
-			}
-			
-			/* Caso chegada ao destino */
 			if(currentPosition.equals(destination)){
 				
-				/* Se estamos a entregar um Parcel que está na Cargo do Truck
-				 */
-				if(destination.equals(currentParcel.getDestination().getPosition())){ // Entregamos o parcel
-					Debug.print(1,this.myAgent.getLocalName() + " ENTREGOU " + currentParcel.getNome() + " Km: " + km);
-					cargo.remove(currentParcel);
-					// Colocamos tudo a null, ele vai tratar de carregar mais um parcel no próximo tick
-					currentRoute = null;
-					destination = null;
-					currentParcel = null;
-				}
-				// FIXME Verificar para situações em que nao estamos a entregar parcels.
+				// Limpamos a rota
+				currentRoute = null;
+				destination = null;
 			}
 			
-			/* Caso exista uma parcel para entregar
-			 * ou seja, uma rota a percorrer, 
+			/* Caso não exista destino */
+			if(destination==null){
+				
+				// Se estivermos em modo parcel criamos nova rota
+				if(modoF == Modo.PARCEL){
+					Parcel nextP = getNextParcel();
+					if( nextP!=null){			// Apenas se houver parcel para entregar
+						destination = nextP.getDestination().getPosition();
+						currentRoute = autoPilot.getPath(currentPosition, destination);
+					}
+				}
+			}
+			
+			/* Caso exista uma rota a percorrer, 
 			 * comemos a cada tick um bocadinho dessa rota
 			 */
 			if(currentRoute!=null){
-				Debug.print(1, this.myAgent.getLocalName() + " GPS: " + currentPosition.getX() + " " + currentPosition.getY() );
-				
+
 				Point next = null;
 				try{
 					next = currentRoute.getPath().pop(); // remove o primeiro elemento da lista
 				}catch (NoSuchElementException e){ // lista vazia, nao ha mais pontos
-					Debug.print(0,"LISTA VAZIA");
+					Debug.print(0, this.myAgent.getLocalName() + "LISTA VAZIA");
 					//reset();	// isto volta a executar o onTick() sem fazer o resto.				
 				}
 				
@@ -226,7 +210,6 @@ public class TruckAgent extends Agent {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -266,7 +249,9 @@ public class TruckAgent extends Agent {
 		if(cargo.isEmpty())
 			return null;
 		// FIXME Retornar a Parcel mais próxima e não a primeira;
-		return (Parcel) cargo.toArray()[0];
+		Parcel p = (Parcel) cargo.toArray()[0];
+		Debug.print(2,this.getLocalName() + ": Proxima parcel is "+ p.getNome());
+		return p;
 	}
 	
 	/**
@@ -341,7 +326,7 @@ public class TruckAgent extends Agent {
 	}
 	
 	/**
-	 * Moves the Parcels inside the truck with it
+	 * Move todas as Parcels no Cargo do Truck para a posição actual
 	 */
 	private void moveCargo() {
 		Iterator<Parcel> iter = this.cargo.iterator();
@@ -350,5 +335,25 @@ public class TruckAgent extends Agent {
 		    parc.setCurrentPosition(currentPosition);
 	    }
 	}
+	
+	/**
+	 * Verifica a posição actual e caso exista uma Parcel a ser entregue para
+	 * essa posição entrega essa Parcel.
+	 */
+	private void checkDelivery() {
+		Iterator<Parcel> iter = this.cargo.iterator();
+	    while (iter.hasNext()) {
+			Parcel parcel = iter.next();
+			/* Entregamos a parcel */
+			if(parcel.getDestination().getPosition().equals(this.getCurrentPosition())){
+				Debug.print(1,this.getLocalName() + " ENTREGOU " + parcel.getNome() + " Km: " + km + " a "
+						+ currentPosition.getX() + " " + currentPosition.getY());
+				delivered.add(parcel);
+				iter.remove();
+			}
+		}
+	}
+	
+	
 	
 }
