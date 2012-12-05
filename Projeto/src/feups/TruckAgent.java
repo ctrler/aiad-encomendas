@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import feups.communication.TruckWorldCommunication;
 import feups.ia.AutoPilot;
 import feups.map.EndOfMapException;
 import feups.map.Path;
@@ -104,36 +105,7 @@ public class TruckAgent extends Agent {
 
 	}
 	
-	public class TruckWorldCommunication implements java.io.Serializable {
-		
-		Point currentPosition;
-		/** Distancia percorrida */
-		double km;
-
-		/**
-		 * @param args
-		 */
-		
-		public TruckWorldCommunication (Point currentPosition, double km){
-			this.currentPosition = currentPosition;
-			this.km = km;
-		}
-		
-		
-		public String print() {
-			return ("CurrentPosition: "+this.getCurrentPosition()+" - km: "+this.getKM());
-		}
-		
-		private double getKM() {
-			return this.km;
-		}
-
-
-		public Point getCurrentPosition(){
-			return this.currentPosition;
-		}
-
-	}
+	
 
 	/**
 	 * Behaviour que responde a mensagens
