@@ -23,12 +23,19 @@ public class Truck {
 	Set<Parcel> parcels;
 	Point currentPosition;
 	
+	//Lista de Pontos percorrida
+	LinkedList<Point> positionHistory;
+	
+	/** Distancia percorrida */
+	double km;
+	
 	/** Constructor that takes the position of the truck;
 	 * 
 	 */
 	public Truck(Point pos){
 		this.currentPosition = pos;
 		parcels = new HashSet<Parcel>();
+		this.positionHistory = new LinkedList<Point>();
 	}
 	
 	public boolean addParcel(Parcel p){
@@ -75,6 +82,10 @@ public class Truck {
 	public Point getCurrentPosition() {
 		return currentPosition;
 	}
+	
+	public LinkedList<Point> getPositionHistory(){
+		return this.positionHistory;
+	}
 
 	/**
 	 * Sets the current position (x, y) for the Truck
@@ -82,6 +93,28 @@ public class Truck {
 	 */
 	public void setCurrentPosition(Point currentPosition) {
 		this.currentPosition = currentPosition;
+	}
+	
+	/**
+	 * Gets the current km done by a truck
+	 * @return
+	 */
+	public double getKM(){
+		return this.km;
+	}
+	
+	/**
+	 * Adds 1km to the truck
+	 */
+	public void addKM(){
+		this.km +=1;
+	}
+	
+	/**
+	 * Sets the current km done
+	 */
+	public void setKM(double km){
+		this.km = km;
 	}
 
 	/**

@@ -12,27 +12,20 @@ import java.awt.Point;
 public class TruckWorldCommunication implements java.io.Serializable {
 	
 	Point currentPosition;
-	/** Distancia percorrida */
-	double km;
 
 	/**
 	 * @param args
 	 */
 	
-	public TruckWorldCommunication (Point currentPosition, double km){
+	public TruckWorldCommunication (Point currentPosition){
 		this.currentPosition = currentPosition;
-		this.km = km;
 	}
 	
 	
 	public String print() {
-		return ("CurrentPosition: "+this.getCurrentPosition()+" - km: "+this.getKM());
+		return ("CurrentPosition: "+this.getCurrentPosition());
 	}
 	
-	private double getKM() {
-		return this.km;
-	}
-
 
 	public Point getCurrentPosition(){
 		return this.currentPosition;
