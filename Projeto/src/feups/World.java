@@ -13,6 +13,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.city.City;
+import feups.communication.TruckWorldCommunication;
 import feups.truck.Truck;
 
 /**
@@ -200,8 +202,38 @@ public class World extends Agent {
 
 		@Override
 		public void action() {
-			// TODO Auto-generated method stub
+			/**
+			 * Receives a message from the TruckAgent with: position and km
+			 */
+			ACLMessage msg = blockingReceive();
+			if (msg != null) {
+				try {
+					TruckWorldCommunication reg =  (TruckWorldCommunication)msg.getContentObject();
+					System.out.println("<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg.print());
+					
+					// Preenche o truckBeacon com os dados recebidos e
+					// constroi lista de pontos percorridos
+					Truck truckBeacon = getTruck(msg.getSender().getLocalName());	//Retorna o truck correspondente
+					truckBeacon.setCurrentPosition(reg.getCurrentPosition());		//Atualiza a posicao do truck
+					truckBeacon.addKM();											//Incrementa 1km percorrido
+					truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
+					
+					printBeacon(truckBeacon); //TODO: Eliminar chamada
+				}
+				catch (UnreadableException ex) { ex.printStackTrace();}
+			}
+		}
 
+		//TODO: Delete me! Just for tests
+		private void printBeacon(Truck truckBeacon) {
+			System.out.println("-------- TRUCKBEACON --------");
+			System.out.println("Truck Current Position" + truckBeacon.getCurrentPosition());
+			System.out.println("Truck Current km" + truckBeacon.getKM());
+			System.out.println("Truck List of Points Followed");
+			for (Point point : truckBeacon.getPositionHistory()) {
+				System.out.println("Position" + point.getLocation());
+			}
+			System.out.println("##############################");
 		}
 
 		@Override

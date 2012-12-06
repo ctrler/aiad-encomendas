@@ -210,7 +210,7 @@ public class TruckAgent extends Agent {
 					try {
 						makeMove(input);
 						informWorld();
-					} catch (EndOfMapException e) {
+					} catch (EndOfMapException | IOException e) {
 						Debug.print(0,e.getMessage());
 					}
 				}
@@ -221,19 +221,30 @@ public class TruckAgent extends Agent {
 		 * Creates the object to be sent to the World with:
 		 * Truck Position, Truck km
 		 */
-		private void informWorld() {
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver( new AID("Agent World", AID.ISLOCALNAME));
-			TruckWorldCommunication reg = new TruckWorldCommunication (currentPosition, km);
+		private void informWorld() throws IOException {
+			// pesquisa DF por agentes "Agente Truck"
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("Agente World"); // Vai procurar por todos os agentes
+											// deste tipo
+			template.addServices(sd1);
+			
+			TruckWorldCommunication reg = new TruckWorldCommunication (currentPosition);
+			
 			try {
+				DFAgentDescription[] result = DFService.search(this.myAgent,
+						template);
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				for (int i = 0; i < result.length; ++i)
+					msg.addReceiver(result[i].getName());
+				
 				msg.setContentObject(reg);
 				msg.setLanguage("JavaSerialization");
-				System.out.println ("Msg send to r1: "+msg);
 				send(msg);
+			}catch (FIPAException e) {
+				e.printStackTrace();
 			}
-			catch (IOException ex) { ex.printStackTrace();}
 		}
-
 	}
 
 	/**
