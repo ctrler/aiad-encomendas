@@ -22,7 +22,7 @@ public class TruckWorldCommunication implements java.io.Serializable {
 	}
 	
 	
-	public String print() {
+	public String toString() {
 		return ("CurrentPosition: "+this.getCurrentPosition());
 	}
 	

@@ -100,7 +100,7 @@ public class TruckAgent extends Agent {
 		
 		ParallelBehaviour par = new ParallelBehaviour(
 				ParallelBehaviour.WHEN_ALL);
-		//par.addSubBehaviour(new TruckAgentBehaviour(this));
+		par.addSubBehaviour(new TruckAgentBehaviour(this));
 		par.addSubBehaviour(new DeliveryParcelsBehaviour(this));
 		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
@@ -160,7 +160,7 @@ public class TruckAgent extends Agent {
 
 		// método action
 		public void onTick() {
-			Debug.print(1, this.myAgent.getLocalName() + " \tGPS: " + currentPosition.getX() + " " + currentPosition.getY() + " Destination is " + destination);
+			Debug.print(1, "<" + this.myAgent.getLocalName() + "> \tGPS: " + currentPosition.getX() + " " + currentPosition.getY() + " Destination is " + destination);
 
 
 			moveCargo(); //Actualizamos a localização dos parcels dentro do camião 

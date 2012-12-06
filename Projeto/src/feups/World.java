@@ -205,23 +205,28 @@ public class World extends Agent {
 			/**
 			 * Receives a message from the TruckAgent with: position and km
 			 */
-			ACLMessage msg = blockingReceive();
+			ACLMessage msg = receive();
 			if (msg != null) {
 				try {
-					TruckWorldCommunication reg =  (TruckWorldCommunication)msg.getContentObject();
-					System.out.println("<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg.print());
-					
-					// Preenche o truckBeacon com os dados recebidos e
-					// constroi lista de pontos percorridos
-					Truck truckBeacon = getTruck(msg.getSender().getLocalName());	//Retorna o truck correspondente
-					truckBeacon.setCurrentPosition(reg.getCurrentPosition());		//Atualiza a posicao do truck
-					truckBeacon.addKM();											//Incrementa 1km percorrido
-					truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
-					
-					printBeacon(truckBeacon); //TODO: Eliminar chamada
+					Object obj = msg.getContentObject();
+					if(obj instanceof TruckWorldCommunication){ 						// Verifica o tipo de objecto
+						TruckWorldCommunication reg =  (TruckWorldCommunication) obj;
+						Debug.print(2,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+						
+						// Preenche o truckBeacon com os dados recebidos e
+						// constroi lista de pontos percorridos
+						Truck truckBeacon = getTruck(msg.getSender().getLocalName());	//Retorna o truck correspondente
+						truckBeacon.setCurrentPosition(reg.getCurrentPosition());		//Atualiza a posicao do truck
+						truckBeacon.addKM();											//Incrementa 1km percorrido
+						truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
+						
+						//printBeacon(truckBeacon); //TODO: Eliminar chamada
+					}
 				}
 				catch (UnreadableException ex) { ex.printStackTrace();}
+				
 			}
+			block();
 		}
 
 		//TODO: Delete me! Just for tests
@@ -231,7 +236,7 @@ public class World extends Agent {
 			System.out.println("Truck Current km" + truckBeacon.getKM());
 			System.out.println("Truck List of Points Followed");
 			for (Point point : truckBeacon.getPositionHistory()) {
-				System.out.println("Position" + point.getLocation());
+				System.out.println("Position" + point);
 			}
 			System.out.println("##############################");
 		}
@@ -285,18 +290,19 @@ public class World extends Agent {
 				e.printStackTrace();
 			}
 			
+			/* Não sei até que ponto isto devia estar aqui... */
 			// Recebe a resposta vinda dos trucks
-			ACLMessage msg = receive();
-			if (msg != null) {
-				if (msg.getPerformative() == ACLMessage.INFORM) {
-					if(!msg.getContent().equals("READY")){
-						System.out.println("TRUCK NOT READY");
-						done();
-					}
-					System.out.println("<" + getLocalName() + "> [RECEIVED] "
-							+ msg.getContent());
-				}
-			}
+//			ACLMessage msg = receive();
+//			if (msg != null) {
+//				if (msg.getPerformative() == ACLMessage.INFORM) {
+//					if(!msg.getContent().equals("READY")){
+//						System.out.println("TRUCK NOT READY");
+//						done();
+//					}
+//					System.out.println("<" + getLocalName() + "> [RECEIVED] "
+//							+ msg.getContent());
+//				}
+//			}
 		}
 
 	}
