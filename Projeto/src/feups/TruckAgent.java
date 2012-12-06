@@ -3,9 +3,12 @@ package feups;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -179,7 +182,7 @@ public class TruckAgent extends Agent {
 				
 				// Se estivermos em modo parcel criamos nova rota
 				if(modoF == Modo.PARCEL){
-					Parcel nextP = getNextParcel();
+					Parcel nextP = getNextCargoParcel();
 					if( nextP!=null){			// Apenas se houver parcel para entregar
 						destination = nextP.getDestination().getPosition();
 						currentRoute = autoPilot.getPath(currentPosition, destination);
@@ -267,16 +270,31 @@ public class TruckAgent extends Agent {
 	/** Próxima Parcel a ser entregue;
 	 * @return A parcela mais próxima ou null se já tiverem sido todas entregues;
 	 */
-	Parcel getNextParcel(){
+	Parcel getNextCargoParcel(){
+		/* TODO Isto está muito complicado para algo que devia ser mais simples...
+		 */
+		
 		if(cargo==null)
 			return null;
 		if(cargo.isEmpty())
 			return null;
-		// FIXME Retornar a Parcel mais próxima e não a primeira;
-		Parcel p = (Parcel) cargo.toArray()[0];
 		
-		Debug.print(2,this.getLocalName() + ": Proxima parcel is "+ p.getNome());
-		return p;
+		List<Parcel> cargoParcels = new LinkedList<Parcel>(cargo);
+
+		Parcel closest = null;
+		long dist = Long.MAX_VALUE;
+		
+		for(Parcel p : cargoParcels){
+			Path tempPath = autoPilot.getPath(getCurrentPosition(),p.getDestination().getPosition());
+			long tempDist = tempPath.calculateLenght();
+			if(tempDist < dist){
+				closest = p;
+				dist = tempDist;
+			}
+		}
+		
+		Debug.print(2,this.getLocalName() + ": Proxima parcel is "+ closest);
+		return closest;
 	}
 	
 	/**

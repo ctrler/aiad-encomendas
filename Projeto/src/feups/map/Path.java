@@ -21,6 +21,16 @@ public class Path {
 	public LinkedList<Point> getPath(){
 		return this.path;
 	}
+	
+	public long calculateLenght(){
+		long len = 0;
+		Point before = path.getFirst();
+		for(Point p: path){
+			p.distance(before);
+			before = p;
+		}
+		return len;
+	}
 
 	@Override
 	public String toString() {

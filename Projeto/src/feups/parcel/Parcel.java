@@ -41,6 +41,15 @@ public class Parcel {
 	public void setCurrentPosition(Point pos) {
 		this.position = pos;
 	}
+
+	@Override
+	public String toString() {
+		return "Parcel [" + (name != null ? "name=" + name + ", " : "")
+				+ (position != null ? "position=" + position + ", " : "")
+				+ (destination != null ? "destination=" + destination : "")
+				+ "]";
+	}
+	
 	
 	
 

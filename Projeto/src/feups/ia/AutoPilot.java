@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import feups.Debug;
@@ -31,7 +32,7 @@ public class AutoPilot {
 	 * @param destinations
 	 * @return List of points (path)
 	 */
-	public Path getPath(Point origin, LinkedList<Point> destinations){
+	public Path getPath(Point origin, List<Point> destinations){
 		
 		ArrayList<Double> tempPoints = new ArrayList<Double>(destinations.size());
 		for (Point point : destinations) {
