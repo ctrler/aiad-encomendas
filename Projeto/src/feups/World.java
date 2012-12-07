@@ -19,10 +19,13 @@ import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.city.City;
+import feups.communication.ParcelCommunication;
+import feups.communication.TruckPathCommunication;
 import feups.communication.TruckWorldCommunication;
 import feups.truck.Truck;
 
@@ -154,31 +157,64 @@ public class World extends Agent {
 	}
 	
 	/**
-	 * Used to Launch new Parcels in the World
-	 * @author Joca
-	 *
+	 * Envia novas parcels aos camioões
 	 */
-	public class CreateParcel extends Behaviour {
-
-		public CreateParcel() {
-			// TODO Auto-generated constructor stub
-		}
+	public class CreateParcel extends TickerBehaviour {
+		// TODO Ir buscar parcels a lista de parcels
+		// TODO verificar qual é o agent mais proximo da parcel
+		
+		private static final long serialVersionUID = 1L;
 
 		public CreateParcel(Agent a) {
-			super(a);
-			// TODO Auto-generated constructor stub
+			super(a, 1000);
 		}
 
 		@Override
-		public void action() {
-			// TODO Auto-generated method stub
+		public void onTick() {
+			// pesquisa DF por agentes "Agente Truck"
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
+											// deste tipo
+			template.addServices(sd1);
+			
+			Parcel p = parcels.get("parcelEspinhoBraga2"); // FIXME Fazer isto para todas as parcels ainda nao assigned.
+			Debug.print(Debug.PrintType.PARCELDELIVERY, "<World> Vou tentar atribuir a parcel " + p.isAssigned());
+			
+			if(!p.isAssigned()){
+				
+				ParcelCommunication reg = new ParcelCommunication();
+				
+				
+				reg.setParcel(p);
+				
+				// Envia a mensagem para os trucks
+				try {
+					DFAgentDescription[] result = DFService.search(this.myAgent,
+							template);
+					
+					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					
+					// FIXME Obter o camião mais próximo!
+					for (int i = 0; i < result.length; ++i){
+						if(result[i].getName().getLocalName().equals("truckEspinho")){
+							msg.addReceiver(result[i].getName());
+							Debug.print(1, "<world> Enviada parcel" + reg.getParcel().getNome() +" para: " + result[i].getName());
+						}
+					}
+					msg.setContentObject(reg);
+					msg.setLanguage("JavaSerialization");
+					send(msg);
+					
+					p.setAssigned(true);
+					
+					
+				} catch (FIPAException | IOException e) {
+					e.printStackTrace();
+					p.setAssigned(false);
+				}
+			}
 
-		}
-
-		@Override
-		public boolean done() {
-			// TODO Auto-generated method stub
-			return false;
 		}
 
 	}

@@ -51,7 +51,18 @@
             "name": "parcelPovoaPorto",
             "position": "Póvoa de Varzim",
             "destination": "Porto"
+        },        
+        {
+            "name": "parcelPovoaPorto2",
+            "position": "Póvoa de Varzim",
+            "destination": "Porto"
+        },
+        {
+            "name": "parcelEspinhoBraga2",
+            "position": "Espinho",
+            "destination": "Braga"
         }
+        
     ],
     "trucks": [
         {
@@ -78,5 +89,14 @@
             ],
             "position": "Espinho"
         }
+    ],
+    "world": [
+    	{
+    		"name": "parcelPovoaPorto2"
+    		
+    	},
+    	{	
+    		"name": "parcelEspinhoBraga2"
+    	}
     ]
 }

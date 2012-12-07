@@ -10,16 +10,22 @@ import feups.city.City;
  * @author Ricardo Teixeira
  *
  */
-public class Parcel {
+public class Parcel implements  java.io.Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6564708950059323455L;
 	String name;
 	Point position;
 	City destination;
+	boolean assigned;
 	
 	
 	public Parcel(String name, Point p, City destination) {
 		this.name = name;
 		this.position = p;
 		this.destination = destination;
+		this.assigned = false;
 	}
 	
 	public String getNome(){
@@ -48,6 +54,14 @@ public class Parcel {
 				+ (position != null ? "position=" + position + ", " : "")
 				+ (destination != null ? "destination=" + destination : "")
 				+ "]";
+	}
+
+	public boolean isAssigned() {
+		return assigned;
+	}
+
+	public void setAssigned(boolean assigned) {
+		this.assigned = assigned;
 	}
 	
 	

@@ -7,10 +7,34 @@ public class Debug {
 	 * 		1 - Info
 	 * 		2 - Verbose
 	 */
-	static final int level = 1;
+	
+	public enum PrintType {
+	    AGENTLOCATION, 
+	    DEBUG,
+	    TRUCKMSG,
+	    PARCELDELIVERY
+	}
+	
+	public static void print(PrintType level, String msg){
+		
+		if(printLevel(level))
+			System.out.println(msg);
+	}
 	
 	public static void print(int level, String msg){
-		if(level<=Debug.level)
 			System.out.println(msg);
+	}
+	
+	private static boolean printLevel(PrintType level){
+		
+		switch(level){
+			case DEBUG :
+				return false;
+			default:
+				return true;
+		
+		}
+
+		
 	}
 }

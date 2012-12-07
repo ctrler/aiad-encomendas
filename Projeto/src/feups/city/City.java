@@ -7,8 +7,12 @@ import java.awt.Point;
  * @author Ricardo Teixeira
  *
  */
-public class City {
+public class City  implements java.io.Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2189028557230825109L;
 	String nome;
 	Point position;
 	

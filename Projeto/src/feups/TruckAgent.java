@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import feups.communication.ParcelCommunication;
 import feups.communication.TruckPathCommunication;
 import feups.communication.TruckWorldCommunication;
 import feups.ia.AutoPilot;
@@ -160,6 +161,13 @@ public class TruckAgent extends Agent {
 								
 								Debug.print(1, "RECEIVED PATH");
 							}
+							
+							/* Adiciona novas parcels ao cargo */
+							if(obj instanceof ParcelCommunication){
+								ParcelCommunication reg =  (ParcelCommunication) obj;
+								cargo.add(reg.getParcel()); // FIXME Mudar para parcels
+								Debug.print(Debug.PrintType.PARCELDELIVERY, this.myAgent.getLocalName() + " > RECEBIDA UMA PARCEL");
+							}
 						}
 					}catch (UnreadableException ex) { ex.printStackTrace();}
 				}
@@ -209,6 +217,7 @@ public class TruckAgent extends Agent {
 					if( nextP!=null){			// Apenas se houver parcel para entregar
 						destination = nextP.getDestination().getPosition();
 						currentRoute = autoPilot.getPath(currentPosition, destination);
+						
 					}
 				}
 			}
@@ -310,7 +319,7 @@ public class TruckAgent extends Agent {
 						// Excepto o proprio truck
 						msg.addReceiver(result[i].getName()); 
 					}
-					else Debug.print(1, "[ERROR] Truck can't send information to itself");
+					else Debug.print(2, "[ERROR] Truck can't send information to itself");
 				}
 				msg.setContentObject(reg);
 				msg.setLanguage("JavaSerialization");
