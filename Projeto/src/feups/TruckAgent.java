@@ -153,13 +153,28 @@ public class TruckAgent extends Agent {
 					//Caso seja REQUEST do path
 					Debug.print(1,"<" + getLocalName() + "> Received REQUEST From <" + msg.getSender().getLocalName() + ">");
 					try {
-						Object obj = msg.getContentObject();
-						if(obj!=null){
-							if(obj instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
-								TruckPathCommunication reg =  (TruckPathCommunication) obj;
-								Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
-								
-								Debug.print(1, "RECEIVED PATH");
+						// Caso a mensagem recebida seja "sendPath"
+						// envia resposta ao sender com o currentRoute atual
+						if(msg.getContent().equals("sendPath")){
+							
+							TruckPathCommunication reg = new TruckPathCommunication(currentRoute);
+							
+							ACLMessage reply = msg.createReply();
+							
+							reply.setContentObject(reg);
+							reply.setLanguage("JavaSerialization");
+							
+							send(reply);
+							
+						}else{
+							// Caso a mensagem seja a resposta ao REQUEST
+							// de envio do Path
+							Object obj = msg.getContentObject();
+							if(obj!=null){
+								if(obj instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
+									TruckPathCommunication reg =  (TruckPathCommunication) obj;
+									Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+								}
 							}
 							
 							/* Adiciona novas parcels ao cargo */
@@ -169,7 +184,7 @@ public class TruckAgent extends Agent {
 								Debug.print(Debug.PrintType.PARCELDELIVERY, this.myAgent.getLocalName() + " > RECEBIDA UMA PARCEL");
 							}
 						}
-					}catch (UnreadableException ex) { ex.printStackTrace();}
+					}catch (IOException | UnreadableException ex) { ex.printStackTrace();}
 				}
 			}
 			block(); // Bloqueia até a proxima mensagem chegar
@@ -213,11 +228,12 @@ public class TruckAgent extends Agent {
 				
 				// Se estivermos em modo parcel criamos nova rota
 				if(modoF == Modo.PARCEL){
-					Parcel nextP = getNextCargoParcel();
-					if( nextP!=null){			// Apenas se houver parcel para entregar
-						destination = nextP.getDestination().getPosition();
-						currentRoute = autoPilot.getPath(currentPosition, destination);
-						
+					//Parcel nextP = getNextCargoParcel();
+					currentRoute = getFullRoute();
+					if(currentRoute!=null){			// Apenas se houver parcel para entregar
+						destination = currentRoute.getPath().getLast();
+						//currentRoute = autoPilot.getPath(currentPosition, destination);
+						//TODO: Get full path for every parcel
 					}
 				}
 			}
@@ -231,7 +247,6 @@ public class TruckAgent extends Agent {
 				try{
 					next = currentRoute.getPath().pop(); // remove o primeiro elemento da lista
 				}catch (NoSuchElementException e){ // lista vazia, nao ha mais pontos
-					Debug.print(0, this.myAgent.getLocalName() + "LISTA VAZIA");
 					//reset();	// isto volta a executar o onTick() sem fazer o resto.				
 				}
 				
@@ -250,6 +265,17 @@ public class TruckAgent extends Agent {
 					}
 				}
 			}
+		}
+
+		private Path getFullRoute() {
+			Path fullRoute = new Path();
+			for(Parcel parcel : cargo){
+				Path tempPath = autoPilot.getPath(parcel.getPosition().getLocation(),parcel.getDestination().getPosition());
+				fullRoute.add(tempPath);
+			}
+			if(fullRoute.getPath().isEmpty()){
+				return null;
+			}else return fullRoute;
 		}
 
 		/**
@@ -305,8 +331,6 @@ public class TruckAgent extends Agent {
 											// deste tipo
 			template.addServices(sd1);
 			
-			TruckPathCommunication reg = new TruckPathCommunication(currentRoute);
-
 			// Envia a mensagem para os trucks
 			try {
 				DFAgentDescription[] result = DFService.search(this.myAgent,
@@ -319,14 +343,13 @@ public class TruckAgent extends Agent {
 						// Excepto o proprio truck
 						msg.addReceiver(result[i].getName()); 
 					}
-					else Debug.print(2, "[ERROR] Truck can't send information to itself");
+					//else Debug.print(1, "[ERROR] Truck can't send information to itself");
 				}
-				msg.setContentObject(reg);
-				msg.setLanguage("JavaSerialization");
-				//msg.setContent("sendPath");
+
+				msg.setContent("sendPath");
 
 				send(msg);
-			} catch (FIPAException | IOException e) {
+			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
 		}
