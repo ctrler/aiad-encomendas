@@ -42,6 +42,12 @@ public class Path implements java.io.Serializable {
 		return str;
 		
 	}
+
+	public void add(Path tempPath) {
+		for(Point point : tempPath.getPath()){
+			this.path.add(point);
+		}
+	}
 	
 	
 	
