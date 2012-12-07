@@ -211,7 +211,7 @@ public class World extends Agent {
 					Object obj = msg.getContentObject();
 					if(obj instanceof TruckWorldCommunication){ 						// Verifica o tipo de objecto
 						TruckWorldCommunication reg =  (TruckWorldCommunication) obj;
-						Debug.print(2,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+						Debug.print(1,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
 						
 						// Preenche o truckBeacon com os dados recebidos e
 						// constroi lista de pontos percorridos

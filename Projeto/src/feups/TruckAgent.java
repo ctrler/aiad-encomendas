@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import feups.communication.TruckPathCommunication;
 import feups.communication.TruckWorldCommunication;
 import feups.ia.AutoPilot;
 import feups.map.EndOfMapException;
@@ -21,6 +22,7 @@ import feups.parcel.Parcel;
 import feups.truck.Truck;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -29,6 +31,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 
 public class TruckAgent extends Agent {
 	
@@ -102,6 +105,7 @@ public class TruckAgent extends Agent {
 				ParallelBehaviour.WHEN_ALL);
 		par.addSubBehaviour(new TruckAgentBehaviour(this));
 		par.addSubBehaviour(new DeliveryParcelsBehaviour(this));
+		par.addSubBehaviour(new OtherTrucksCommunication(this));
 		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
 		addBehaviour(par);
@@ -130,15 +134,34 @@ public class TruckAgent extends Agent {
 			// agente, o que fazia o outro behaviour nao imprimir coisas
 			ACLMessage msg = receive();
 			if (msg != null) {
+				//Caso seja mensagem de rotina de escuta
 				if (msg.getPerformative() == ACLMessage.INFORM) {
 					System.out.println("<" + getLocalName() + "> [RECEIVED] "
 							+ msg.getContent());
+					
+					
 					// cria resposta
 					// ACLMessage reply = msg.createReply();
 					// preenche conteúdo da mensagem
 					// reply.setContent("Hello there");
 					// envia mensagem
 					// send(reply);
+				}
+				//Caso seja mensagem de REQUEST
+				if(msg.getPerformative() == ACLMessage.REQUEST){
+					//Caso seja REQUEST do path
+					Debug.print(1,"<" + getLocalName() + "> Received REQUEST From <" + msg.getSender().getLocalName() + ">");
+					try {
+						Object obj = msg.getContentObject();
+						if(obj!=null){
+							if(obj instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
+								TruckPathCommunication reg =  (TruckPathCommunication) obj;
+								Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+								
+								Debug.print(1, "RECEIVED PATH");
+							}
+						}
+					}catch (UnreadableException ex) { ex.printStackTrace();}
 				}
 			}
 			block(); // Bloqueia até a proxima mensagem chegar
@@ -225,7 +248,7 @@ public class TruckAgent extends Agent {
 		 * Truck Position, Truck km
 		 */
 		private void informWorld() throws IOException {
-			// pesquisa DF por agentes "Agente Truck"
+			// pesquisa DF por agentes "Agente World"
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription sd1 = new ServiceDescription();
 			sd1.setType("Agente World"); // Vai procurar por todos os agentes
@@ -248,6 +271,58 @@ public class TruckAgent extends Agent {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * @author Joca
+	 *
+	 */
+	public class OtherTrucksCommunication extends TickerBehaviour {
+
+		public OtherTrucksCommunication(Agent a) {
+			super(a, 5000);
+		}
+
+		
+		@Override
+		public void onTick() {
+			/**
+			 * Prepares message to be sent to other trucks in broadcast way
+			 */
+			// pesquisa DF por agentes "Agente Truck"
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
+											// deste tipo
+			template.addServices(sd1);
+			
+			TruckPathCommunication reg = new TruckPathCommunication(currentRoute);
+
+			// Envia a mensagem para os trucks
+			try {
+				DFAgentDescription[] result = DFService.search(this.myAgent,
+						template);
+				// envia mensagem "pong" inicial a todos os agentes "ping"
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				for (int i = 0; i < result.length; ++i){
+					if(!result[i].getName().getLocalName().equals(getLocalName())){
+						// Envia uma mensagem para multiplos destinos
+						// Excepto o proprio truck
+						msg.addReceiver(result[i].getName()); 
+					}
+					else Debug.print(1, "[ERROR] Truck can't send information to itself");
+				}
+				msg.setContentObject(reg);
+				msg.setLanguage("JavaSerialization");
+				//msg.setContent("sendPath");
+
+				send(msg);
+			} catch (FIPAException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+
 	}
 
 	/**

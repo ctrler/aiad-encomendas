@@ -3,7 +3,7 @@ package feups.map;
 import java.awt.Point;
 import java.util.LinkedList;
 
-public class Path {
+public class Path implements java.io.Serializable {
 	private LinkedList<Point> path;
 	
 	public Path(){
