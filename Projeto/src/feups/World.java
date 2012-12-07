@@ -3,6 +3,7 @@ package feups;
 import jade.core.Agent;
 
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -21,12 +22,14 @@ import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+
 import feups.map.Roads;
 import feups.parcel.Parcel;
 import feups.city.City;
 import feups.communication.ParcelCommunication;
 import feups.communication.TruckPathCommunication;
-import feups.communication.TruckWorldCommunication;
+import feups.communication.TruckWorldPosCommunication;
 import feups.truck.Truck;
 
 /**
@@ -81,10 +84,9 @@ public class World extends Agent {
 
 		// defines the behaviour
 				
-		//addBehaviour(new CreateTrucks(this));
 		addBehaviour(new CreateParcel(this));
 		addBehaviour(new ReceiveTruckMovement(this));
-		addBehaviour(new SendMsgBehaviour(this));
+		addBehaviour(new PrintStatus(this));
 		
 
 		/* Loads the world into this agent */
@@ -117,43 +119,6 @@ public class World extends Agent {
 
 		}
 
-	}
-	
-	/**
-	 * Defines the behaviour of our agent
-	 */
-	class WorldBehaviour extends SimpleBehaviour {
-		private static final long serialVersionUID = 1837679922616403427L;
-		private int n = 0;
-
-		/** Default constructor */
-		public WorldBehaviour(Agent a) {
-			super(a);
-		}
-
-		/**
-		 * Envia e recebe as mensagens dos trucks.
-		 */
-		public void action() {
-			ACLMessage msg = blockingReceive();
-			if (msg.getPerformative() == ACLMessage.INFORM) {
-				//System.out.println(++n + " " + getLocalName() + ": recebi "
-						//+ msg.getContent());
-				// // cria resposta
-				// ACLMessage reply = msg.createReply();
-				// // preenche conteúdo da mensagem
-				// reply.setContent("Mensagem recebida. Toca a trabalhar!");
-				// send(reply);
-			}
-		}
-
-		/**
-		 * Controls the termination of the agent When this returns true, the
-		 * agent stops.
-		 */
-		public boolean done() {
-			return false;
-		}
 	}
 	
 	/**
@@ -225,38 +190,37 @@ public class World extends Agent {
 	 * @author Joca
 	 *
 	 */
-	public class ReceiveTruckMovement extends Behaviour {
+	public class ReceiveTruckMovement extends CyclicBehaviour {
+
+		private static final long serialVersionUID = -8422485146766422510L;
 
 		public ReceiveTruckMovement() {
-			// TODO Auto-generated constructor stub
 		}
 
 		public ReceiveTruckMovement(Agent a) {
 			super(a);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
 		public void action() {
 			/**
-			 * Receives a message from the TruckAgent with: position and km
+			 * Recebe dos trucks uma mensagem com a posiçao e actualiza;
 			 */
 			ACLMessage msg = receive();
 			if (msg != null) {
 				try {
 					Object obj = msg.getContentObject();
-					if(obj instanceof TruckWorldCommunication){ 						// Verifica o tipo de objecto
-						TruckWorldCommunication reg =  (TruckWorldCommunication) obj;
-						Debug.print(1,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+					if(obj instanceof TruckWorldPosCommunication){ 						// Verifica o tipo de objecto
+						TruckWorldPosCommunication reg =  (TruckWorldPosCommunication) obj;
+						Debug.print(Debug.PrintType.AGENTLOCATIONRECEIVED,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
 						
 						// Preenche o truckBeacon com os dados recebidos e
 						// constroi lista de pontos percorridos
 						Truck truckBeacon = getTruck(msg.getSender().getLocalName());	//Retorna o truck correspondente
-						truckBeacon.setCurrentPosition(reg.getCurrentPosition());		//Atualiza a posicao do truck
+						truckBeacon.setCurrentPosition(reg.getCurrentPosition().getLocation());		//Atualiza a posicao do truck
 						truckBeacon.addKM();											//Incrementa 1km percorrido
 						truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
-						
-						//printBeacon(truckBeacon); //TODO: Eliminar chamada
+					
 					}
 				}
 				catch (UnreadableException ex) { ex.printStackTrace();}
@@ -264,86 +228,34 @@ public class World extends Agent {
 			}
 			block();
 		}
-
-		//TODO: Delete me! Just for tests
-		private void printBeacon(Truck truckBeacon) {
-			System.out.println("-------- TRUCKBEACON --------");
-			System.out.println("Truck Current Position" + truckBeacon.getCurrentPosition());
-			System.out.println("Truck Current km" + truckBeacon.getKM());
-			System.out.println("Truck List of Points Followed");
-			for (Point point : truckBeacon.getPositionHistory()) {
-				System.out.println("Position" + point);
-			}
-			System.out.println("##############################");
-		}
-
-		@Override
-		public boolean done() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 	}
 	
 	/**
-	 * Para enviar mensagens de tempos a tempos de forma a testar os trucks Mais
+	 * Imprime o estado de todos os camioes
 	 * em: http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer6.html#6.6.4
 	 */
-	class SendMsgBehaviour extends TickerBehaviour {
+	class PrintStatus extends TickerBehaviour {
 		private static final long serialVersionUID = 1837679922616403427L;
 		private int n = 0;
 
-		/** Default constructor */
-		public SendMsgBehaviour(Agent a) {
-			super(a, 5000); // 5000 é o tempo entre cada tick
+		public PrintStatus(Agent a) {
+			super(a, 1000); 
 		}
 
-		/**
-		 * Envia mensagem ao truck
-		 */
 		public void onTick() {
-			// pesquisa DF por agentes "Agente Truck"
-			DFAgentDescription template = new DFAgentDescription();
-			ServiceDescription sd1 = new ServiceDescription();
-			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
-											// deste tipo
-			template.addServices(sd1);
-
-			// Envia a mensagem para os trucks
-			try {
-				DFAgentDescription[] result = DFService.search(this.myAgent,
-						template);
-				// envia mensagem "pong" inicial a todos os agentes "ping"
-				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-				for (int i = 0; i < result.length; ++i)
-					msg.addReceiver(result[i].getName()); // Envia uma mensagem
-															// para multiplos
-															// destinos
-				msg.setContent("mensagem de 5 em 5 segundos");
-
-				send(msg);
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
 			
-			/* Não sei até que ponto isto devia estar aqui... */
-			// Recebe a resposta vinda dos trucks
-//			ACLMessage msg = receive();
-//			if (msg != null) {
-//				if (msg.getPerformative() == ACLMessage.INFORM) {
-//					if(!msg.getContent().equals("READY")){
-//						System.out.println("TRUCK NOT READY");
-//						done();
-//					}
-//					System.out.println("<" + getLocalName() + "> [RECEIVED] "
-//							+ msg.getContent());
-//				}
-//			}
+			for(String name: trucks.keySet())
+				System.err.print(name + "\t");
+			System.err.println();
+			for(Map.Entry<String, Truck> cursor : trucks.entrySet()) {
+				System.err.print(cursor.getValue().getCurrentPosition().getX() + "," + cursor.getValue().getCurrentPosition().getY()+"\t\t");
+			}
+			System.err.println();
+			
 		}
 
 	}
 
-	/** So we can take down our agent */
 	protected void takeDown() {
 		// retira registo no DF
 		try {
@@ -462,5 +374,9 @@ public class World extends Agent {
 	public HashMap<String, Truck> getTrucks() {
 		return this.trucks;
 	}
+	
+	
+	
+	
 
 }
