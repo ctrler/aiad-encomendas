@@ -206,7 +206,7 @@ public class World extends Agent {
 			template.addServices(sd1);
 			
 			Parcel p = parcels.get("parcelEspinhoBraga2"); // FIXME Fazer isto para todas as parcels ainda nao assigned.
-			Debug.print(Debug.PrintType.PARCELDELIVERY, "<World> Vou tentar atribuir a parcel " + p.isAssigned());
+			Debug.print(Debug.PrintType.PARCELDELIVERY, "<" + getLocalName() + "> Vou tentar atribuir a parcel " + p.isAssigned());
 			
 			if(!p.isAssigned()){
 				
@@ -226,7 +226,7 @@ public class World extends Agent {
 					for (int i = 0; i < result.length; ++i){
 						if(result[i].getName().getLocalName().equals("2")){
 							msg.addReceiver(result[i].getName());
-							Debug.print(1, "<world> Enviada parcel" + reg.getParcel().getNome() +" para: " + result[i].getName());
+							Debug.print(1, "<" + getLocalName() + "> Enviada parcel" + reg.getParcel().getNome() +" para: " + result[i].getName());
 						}
 					}
 					msg.setContentObject(reg);
@@ -274,7 +274,7 @@ public class World extends Agent {
 					Object obj = msg.getContentObject();
 					if(obj instanceof TruckWorldPosCommunication){ 						// Verifica o tipo de objecto
 						TruckWorldPosCommunication reg =  (TruckWorldPosCommunication) obj;
-						Debug.print(Debug.PrintType.AGENTLOCATIONRECEIVED,"<world> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+						Debug.print(Debug.PrintType.AGENTLOCATIONRECEIVED,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
 						
 						// Preenche o truckBeacon com os dados recebidos e
 						// constroi lista de pontos percorridos

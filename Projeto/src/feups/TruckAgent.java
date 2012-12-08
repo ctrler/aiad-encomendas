@@ -106,7 +106,6 @@ public class TruckAgent extends Agent {
 				ParallelBehaviour.WHEN_ALL);
 		par.addSubBehaviour(new TruckAgentBehaviour(this));
 		par.addSubBehaviour(new DeliveryParcelsBehaviour(this));
-		par.addSubBehaviour(new OtherTrucksCommunication(this));
 		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
 		addBehaviour(par);
@@ -130,34 +129,44 @@ public class TruckAgent extends Agent {
 		// método action
 		public void action() {
 
-			// Espera por mensagens recebidas
-			// ACLMessage msg = blockingReceive(); // Isto bloqueava todo o
-			// agente, o que fazia o outro behaviour nao imprimir coisas
 			ACLMessage msg = receive();
 			if (msg != null) {
+				
 				//Caso seja mensagem de rotina de escuta
 				if (msg.getPerformative() == ACLMessage.INFORM) {
-					System.out.println("<" + getLocalName() + "> [RECEIVED] "
-							+ msg.getContent());
+					
+					try {
+						Object obj = msg.getContentObject();
+						
+						// Caso a mensagem seja um Path vindo de outros trucks
+						if(obj!=null && obj instanceof TruckPathCommunication){
+							TruckPathCommunication reg =  (TruckPathCommunication) obj;
+							Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+							//TODO: Calcular RV e enviar reply;
+							//Verificar qual o ponto comum mais próximo
+							
+							//Gerar Novo PATH em comum
+							
+							//Verificar se novo Path gerado é melhor em termos de custo que
+							//antigos paths somados
+							
+						}
+					} catch (UnreadableException e) {
+						e.printStackTrace();
+					}
 					
 					
-					// cria resposta
-					// ACLMessage reply = msg.createReply();
-					// preenche conteúdo da mensagem
-					// reply.setContent("Hello there");
-					// envia mensagem
-					// send(reply);
 				}
 				//Caso seja mensagem de REQUEST
-				if(msg.getPerformative() == ACLMessage.REQUEST){
+				if(msg.getPerformative() == ACLMessage.PROPOSE){
 					//Caso seja REQUEST do path
-					Debug.print(1,"<" + getLocalName() + "> Received REQUEST From <" + msg.getSender().getLocalName() + ">");
+					Debug.print(1,"<" + getLocalName() + "> Received PROPOSE From <" + msg.getSender().getLocalName() + ">");
 					try {
 						// Caso a mensagem recebida seja "sendPath"
 						// envia resposta ao sender com o currentRoute atual
 						if(msg.getContent().equals("sendPath")){
 							
-							TruckPathCommunication reg = new TruckPathCommunication(currentRoute);
+							TruckPathCommunication reg = new TruckPathCommunication(currentRoute, cargo);
 							
 							ACLMessage reply = msg.createReply();
 							
@@ -232,8 +241,8 @@ public class TruckAgent extends Agent {
 					currentRoute = getFullRoute();
 					if(currentRoute!=null){			// Apenas se houver parcel para entregar
 						destination = currentRoute.getPath().getLast();
+						informOtherTrucks();
 						//currentRoute = autoPilot.getPath(currentPosition, destination);
-						//TODO: Get full path for every parcel
 					}
 				}
 			}
@@ -264,6 +273,47 @@ public class TruckAgent extends Agent {
 						Debug.print(0,e.getMessage());
 					}
 				}
+			}
+		}
+
+		/**
+		 * Envia INFORM com Path + Parcels num objeto serializável
+		 * para todos os restantes trucks do sistema
+		 */
+		private void informOtherTrucks() {
+			/**
+			 * Prepares message to be sent to other trucks in broadcast way
+			 */
+			// pesquisa DF por agentes "Agente Truck"
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
+											// deste tipo
+			template.addServices(sd1);
+			
+			// Envia a mensagem para os trucks
+			try {
+				DFAgentDescription[] result = DFService.search(this.myAgent,
+						template);
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				
+				TruckPathCommunication reg = new TruckPathCommunication(currentRoute, cargo);
+				
+				for (int i = 0; i < result.length; ++i){
+					if(!result[i].getName().getLocalName().equals(getLocalName())){
+						// Envia uma mensagem para multiplos destinos
+						// Excepto o proprio truck
+						msg.addReceiver(result[i].getName()); 
+					}
+				}
+				
+				msg.setContentObject(reg);
+				msg.setLanguage("JavaSerialization");
+				//msg.setContent("sendPath");
+
+				send(msg);
+			} catch (FIPAException | IOException e) {
+				e.printStackTrace();
 			}
 		}
 
@@ -308,54 +358,6 @@ public class TruckAgent extends Agent {
 		}
 	}
 	
-	/**
-	 * @author Joca
-	 *
-	 */
-	public class OtherTrucksCommunication extends TickerBehaviour {
-
-		public OtherTrucksCommunication(Agent a) {
-			super(a, 5000);
-		}
-
-		
-		@Override
-		public void onTick() {
-			/**
-			 * Prepares message to be sent to other trucks in broadcast way
-			 */
-			// pesquisa DF por agentes "Agente Truck"
-			DFAgentDescription template = new DFAgentDescription();
-			ServiceDescription sd1 = new ServiceDescription();
-			sd1.setType("Agente Truck"); // Vai procurar por todos os agentes
-											// deste tipo
-			template.addServices(sd1);
-			
-			// Envia a mensagem para os trucks
-			try {
-				DFAgentDescription[] result = DFService.search(this.myAgent,
-						template);
-				// envia mensagem "pong" inicial a todos os agentes "ping"
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				for (int i = 0; i < result.length; ++i){
-					if(!result[i].getName().getLocalName().equals(getLocalName())){
-						// Envia uma mensagem para multiplos destinos
-						// Excepto o proprio truck
-						msg.addReceiver(result[i].getName()); 
-					}
-					//else Debug.print(1, "[ERROR] Truck can't send information to itself");
-				}
-
-				msg.setContent("sendPath");
-
-				send(msg);
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
-		}
-
-
-	}
 
 	/**
 	 * Behaviour que envia posição actual ao World
