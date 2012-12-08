@@ -12,7 +12,7 @@ public class Debug {
 	    AGENTLOCATION, 
 	    DEBUG,
 	    TRUCKMSG,
-	    PARCELDELIVERY
+	    PARCELDELIVERY, AGENTLOCATIONRECEIVED
 	}
 	
 	public static void print(PrintType level, String msg){
@@ -29,6 +29,8 @@ public class Debug {
 		
 		switch(level){
 			case DEBUG :
+				return false;
+			case AGENTLOCATIONRECEIVED:
 				return false;
 			default:
 				return true;

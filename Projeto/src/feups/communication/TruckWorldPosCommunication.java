@@ -9,7 +9,7 @@ import java.awt.Point;
  * @author Joca
  *
  */
-public class TruckWorldCommunication implements java.io.Serializable {
+public class TruckWorldPosCommunication implements java.io.Serializable {
 	
 	Point currentPosition;
 
@@ -17,7 +17,7 @@ public class TruckWorldCommunication implements java.io.Serializable {
 	 * @param args
 	 */
 	
-	public TruckWorldCommunication (Point currentPosition){
+	public TruckWorldPosCommunication (Point currentPosition){
 		this.currentPosition = currentPosition;
 	}
 	

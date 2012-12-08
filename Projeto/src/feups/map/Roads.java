@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -37,6 +38,15 @@ public class Roads {
 	
 	public ArrayList<ArrayList<String>> getMap(){
 		return this.map;
+	}
+	
+	/** Construtor de cópia. 
+	 * Para fazer uma cópia do objecto.
+	 */
+	@SuppressWarnings("unchecked")
+	public Roads(Roads another) {
+		this.map = (ArrayList<ArrayList<String>>) org.apache.commons.lang.SerializationUtils.clone(another.getMap());
+		this.cities = (HashMap<String,City>) org.apache.commons.lang.SerializationUtils.clone(another.cities);
 	}
 	
 	public String getXY(int x, int y){
@@ -87,7 +97,7 @@ public class Roads {
 			for (char c : lineChars) {
 				switch (c) {
 				case '#':
-					map.get(x).add("#");
+					map.get(x).add("\u2591");
 					break;
 				case ' ':
 					map.get(x).add(" ");

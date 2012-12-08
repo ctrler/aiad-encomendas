@@ -14,7 +14,7 @@ import java.util.Set;
 
 import feups.communication.ParcelCommunication;
 import feups.communication.TruckPathCommunication;
-import feups.communication.TruckWorldCommunication;
+import feups.communication.TruckWorldPosCommunication;
 import feups.ia.AutoPilot;
 import feups.map.EndOfMapException;
 import feups.map.Path;
@@ -290,7 +290,7 @@ public class TruckAgent extends Agent {
 											// deste tipo
 			template.addServices(sd1);
 			
-			TruckWorldCommunication reg = new TruckWorldCommunication (currentPosition);
+			TruckWorldPosCommunication reg = new TruckWorldPosCommunication (currentPosition);
 			
 			try {
 				DFAgentDescription[] result = DFService.search(this.myAgent,

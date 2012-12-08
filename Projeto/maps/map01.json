@@ -66,7 +66,7 @@
     ],
     "trucks": [
         {
-            "name": "truckPovoa",
+            "name": "1",
             "parcels": [
                 {
                     "name": "parcelBragaViana"
@@ -78,7 +78,7 @@
             "position": "Póvoa de Varzim"
         },
         {
-            "name": "truckEspinho",
+            "name": "2",
             "parcels": [
                 {
                     "name": "parcelPovoaPorto"
