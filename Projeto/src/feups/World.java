@@ -256,7 +256,7 @@ public class World extends Agent {
 						truckBeacon.addKM();											//Incrementa 1km percorrido
 						truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
 						
-						//printBeacon(truckBeacon); //TODO: Eliminar chamada
+						printBeacon(truckBeacon); //TODO: Eliminar chamada
 					}
 				}
 				catch (UnreadableException ex) { ex.printStackTrace();}
