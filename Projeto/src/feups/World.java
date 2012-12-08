@@ -2,10 +2,13 @@ package feups;
 
 import jade.core.Agent;
 
+
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 
@@ -32,6 +35,21 @@ import feups.communication.TruckPathCommunication;
 import feups.communication.TruckWorldPosCommunication;
 import feups.truck.Truck;
 
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.window.ApplicationWindow;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+//import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;	
+import org.eclipse.swt.widgets.*;
+
+
+
+
+
 /**
  * Stores world with map, trucks, etc..
  * 
@@ -54,6 +72,8 @@ public class World extends Agent {
 	HashMap<String, Truck> trucks;
 	HashMap<String, Parcel> parcels;
 
+	Text mapText;
+	
 	/**
 	 * Default constructor
 	 */
@@ -88,6 +108,11 @@ public class World extends Agent {
 		addBehaviour(new ReceiveTruckMovement(this));
 		addBehaviour(new PrintStatus(this));
 		
+		// Cria uma thread e chama o behaviour do GUI la dentro (senão bloqueava)
+		ThreadedBehaviourFactory tbf = new
+				ThreadedBehaviourFactory();
+		addBehaviour(tbf.wrap(new GuiBehaviour()));
+		
 
 		/* Loads the world into this agent */
 		Parser parser = new Parser(this);
@@ -118,7 +143,44 @@ public class World extends Agent {
 			}
 
 		}
+		
 
+		  
+	}
+	
+	
+	public class GuiBehaviour extends OneShotBehaviour{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 419316773680070435L;
+
+		@Override
+		public void action() {
+			  Display myDisplay = new Display();
+			  final Shell myShell = new Shell(myDisplay);
+			  myShell.setText("Map");
+			  myShell.setBounds(100, 100, 500, 300);
+			  myShell.setLayout(new FillLayout());
+			  
+			  Font terminalFont = JFaceResources.getFont(JFaceResources.TEXT_FONT);
+			  
+			  mapText = new Text(myShell, SWT.MULTI);
+			  mapText.setFont(terminalFont);
+			  mapText.setText("...");
+			  //mapText.pack();
+			  
+			  //myShell.pack();
+			  myShell.open();
+			  while (!myShell.isDisposed()) {
+			   if (!myDisplay.readAndDispatch())
+			    myDisplay.sleep();
+			  }
+			  myDisplay.dispose();
+			
+		}
+		
 	}
 	
 	/**
@@ -162,7 +224,7 @@ public class World extends Agent {
 					
 					// FIXME Obter o camião mais próximo!
 					for (int i = 0; i < result.length; ++i){
-						if(result[i].getName().getLocalName().equals("truckEspinho")){
+						if(result[i].getName().getLocalName().equals("2")){
 							msg.addReceiver(result[i].getName());
 							Debug.print(1, "<world> Enviada parcel" + reg.getParcel().getNome() +" para: " + result[i].getName());
 						}
@@ -252,6 +314,8 @@ public class World extends Agent {
 			}
 			System.err.println();
 			
+			guiText(printRoads());
+			
 		}
 
 	}
@@ -289,19 +353,20 @@ public class World extends Agent {
 		return this.roads;
 	}
 
+	
+	/** Retorna a visualização do mapa com os trucks em cima
+	 * 
+	 */
 	public String printRoads() {
-
-		String output = "";
-		String temp = "";
-		for (int y = 1; y <= this.roads.getHeight(); y++) {
-			String output_line = "";
-			for (int x = 1; x <= this.roads.getWidth(); x++) {
-				String cell = this.roads.getXY(x, y);
-				output_line += cell;
-			}
-			output = output_line + "\n" + output;
+		Roads tempRoads = new Roads(roads); // Construtor de cópia
+		
+		for(Map.Entry<String, Truck> cursor : trucks.entrySet()) {
+			Truck t = cursor.getValue();
+			tempRoads.setXY(t.getCurrentPosition().getX(), t.getCurrentPosition().getY(), cursor.getKey());
 		}
-
+		
+		String output = tempRoads.print();
+		
 		return output;
 
 	}
@@ -328,8 +393,8 @@ public class World extends Agent {
 
 		if (!trucks.containsKey(name)) {
 			trucks.put(name, truck);
-			this.getMap().setXY(truck.getCurrentPosition().getX(),
-					truck.getCurrentPosition().getY(), "T");
+			//this.getMap().setXY(truck.getCurrentPosition().getX(),
+			//		truck.getCurrentPosition().getY(), "T");
 			return true;
 		} else
 			return false; // truck already exists
@@ -359,8 +424,8 @@ public class World extends Agent {
 
 		if (!parcels.containsKey(name)) {
 			parcels.put(name, parcel);
-			this.getMap().setXY(destination.getPosition().getX(),
-					destination.getPosition().getY(), "P");
+			//this.getMap().setXY(destination.getPosition().getX(),
+			//		destination.getPosition().getY(), "P");
 			return true;
 		} else
 			return false;
@@ -375,7 +440,18 @@ public class World extends Agent {
 		return this.trucks;
 	}
 	
-	
+	/**
+	 * Imprime na janela GUI um texto
+	 * Feito para imprimir o mapa.
+	 */
+	public void guiText(final String text){
+		Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {
+		        mapText.setText(text);
+		    }
+		});
+		
+	}
 	
 	
 
