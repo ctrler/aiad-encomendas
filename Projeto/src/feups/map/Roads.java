@@ -174,6 +174,19 @@ public class Roads {
 		return cities.get(name);
 	}
 	
+	/**
+	 * Imprime uma rota no mapa.
+	 * @return
+	 */
+	public String printRoute(Path path){
+		Roads tempRoads = new Roads(this);
+		
+		for(Point p : path.getPath()){
+			tempRoads.setXY(p.getX(), p.getY(), "+");
+		}
+		
+		return tempRoads.print();
+	}
 	
 
 
