@@ -22,7 +22,7 @@ public class AutoPilot {
 	}
 	
 	private boolean isWalkable(String left){
-		return (left == "#" || left =="X" || left == "T" || left == "P");
+		return (left == "#" || left =="X" || left == "T" || left == "P" || left == "\u2591");
 	}
 	
 	/**

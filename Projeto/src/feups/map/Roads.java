@@ -97,7 +97,7 @@ public class Roads {
 			for (char c : lineChars) {
 				switch (c) {
 				case '#':
-					map.get(x).add("#");
+					map.get(x).add("\u2591");
 					break;
 				case ' ':
 					map.get(x).add(" ");
