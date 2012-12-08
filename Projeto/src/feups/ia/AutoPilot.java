@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import feups.Debug;
@@ -22,7 +21,7 @@ public class AutoPilot {
 	}
 	
 	private boolean isWalkable(String left){
-		return (left == "#" || left =="X" || left == "T" || left == "P" || left == "\u2591");
+		return (left == "#" || left =="X" || left == "T" || left == "P");
 	}
 	
 	/**
@@ -32,7 +31,7 @@ public class AutoPilot {
 	 * @param destinations
 	 * @return List of points (path)
 	 */
-	public Path getPath(Point origin, List<Point> destinations){
+	public Path getPath(Point origin, LinkedList<Point> destinations){
 		
 		ArrayList<Double> tempPoints = new ArrayList<Double>(destinations.size());
 		for (Point point : destinations) {
