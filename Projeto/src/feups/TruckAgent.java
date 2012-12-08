@@ -321,6 +321,8 @@ public class TruckAgent extends Agent {
 			Path fullRoute = new Path();
 			for(Parcel parcel : cargo){
 				Path tempPath = autoPilot.getPath(parcel.getPosition().getLocation(),parcel.getDestination().getPosition());
+				Path connectionPath = autoPilot.getPath(parcel.getDestination().getPosition(),parcel.getDestination().getPosition());
+				System.out.println("PATH de " + getLocalName() + " " + tempPath);
 				fullRoute.add(tempPath);
 			}
 			if(fullRoute.getPath().isEmpty()){
