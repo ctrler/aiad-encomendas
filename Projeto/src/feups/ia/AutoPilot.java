@@ -86,7 +86,7 @@ public class AutoPilot {
 		}
 		
 		/* Print */
-		Debug.print(2,"PATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + path);
+		Debug.print(Debug.PrintType.AUTOPILOT,"PATH ("+origin.x+","+origin.y+":"+destination.x+","+destination.y+"): " + path);
 		return path;
 	}
 	

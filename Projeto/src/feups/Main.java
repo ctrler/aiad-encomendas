@@ -6,9 +6,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import feups.city.City;
 import feups.communication.TruckPathCommunication;
 import feups.ia.AutoPilot;
 import feups.map.EndOfMapException;
@@ -46,19 +48,71 @@ public class Main {
 		
 		AutoPilot autoPilot = new AutoPilot(world.getMap());
 		
-		Path path1 = autoPilot.getPath(new Point(4,3), new Point(11,11));
-		Parcel parcel1;
+		Point pontoOrigemA = new Point(4,3);
+		Point pontoOrigemB = new Point(15,3);
+		Point pontoDestinoA = new Point(11,11);
+		Point pontoDestinoB =  new Point(7,11);
 		
-		Path path2 = autoPilot.getPath(new Point(15,3), new Point(7,11));
-		Parcel parcel2;
+		City destinoA = new City("Cidade destino A", pontoDestinoA);
+		City destinoB = new City("Cidade destino B", pontoDestinoB);
 		
-		System.out.println(path1.toString());
-		System.out.println(world.getMap().printRoute(path1));
-		System.out.println(path2.toString());
-		System.out.println(world.getMap().printRoute(path2));
+		Parcel A = new Parcel("A",pontoOrigemA, destinoA);
+		Parcel B = new Parcel("B",pontoOrigemB, destinoA);
+		
+		Path pathA = autoPilot.getPath(pontoOrigemA, pontoDestinoA);
+		Path pathB = autoPilot.getPath(pontoOrigemB, pontoDestinoB);
+		
+		int custoA = pathA.getPath().size();
+		int custoB = pathB.getPath().size();
+		
+		System.out.println(pathA.toString());
+		System.out.println(world.getMap().printRoute(pathA));
+		System.out.println(pathB.toString());
+		System.out.println(world.getMap().printRoute(pathB));
+		
+		
 		// Determinar o ponto de encontro em path1 e path2
+		Point pontoEncontroA = pathA.getFirstCommon(pathB);
+		Point pontoEncontroB = pathB.getFirstCommon(pathA);
 		
-				
+		System.out.println("Ponto de encontro A é " + pontoEncontroA);
+		System.out.println("Ponto de encontro B é " + pontoEncontroB);
+		
+		
+		Point pontoEncontro = pontoEncontroB;
+		
+		// Custo de entregar ponto de encontro + minha +  dele;
+		Path pathA_mais_B = autoPilot.getPath(pontoOrigemA, pontoEncontro);
+		
+		List<Point> pointsParcels = new LinkedList<Point>();
+		pointsParcels.add(pontoDestinoA);
+		pointsParcels.add(pontoDestinoB);
+		
+		pathA_mais_B.add(autoPilot.getPath(pontoEncontro, pointsParcels));
+		
+		/* Como o AutoPilot.getPath() devolve apenas o path ate ao primeiro ponto
+		 * temos que ver qual dos pontos é que ele encontrou primeiro e depois 
+		 * adicionar o path até ao segundo ponto.
+		 */
+		if(pathA_mais_B.getPath().getLast().equals(pontoDestinoA)){
+			pathA_mais_B.add(autoPilot.getPath(pontoDestinoA, pontoDestinoB));
+		}
+		else{
+			pathA_mais_B.add(autoPilot.getPath(pontoDestinoB, pontoDestinoA));
+		}
+		
+		System.out.println(pathA_mais_B.toString());
+		System.out.println(world.getMap().printRoute(pathA_mais_B));
+		
+		/* Agora que temos todas as hipoteses verificamos qual é a melhor opção
+		 */
+		int custoPathA_mais_B = pathA_mais_B.getPath().size();
+		
+		int hipoteseSeparados = custoA+custoB;
+		int hipoteseJuntos = custoPathA_mais_B + autoPilot.getPath(pontoOrigemB, pontoEncontro).getPath().size();
+		
+		System.out.println("custo separados: " + hipoteseSeparados +"\ncusto juntos: " + hipoteseJuntos);
+			
 	}
 	
 	

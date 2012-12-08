@@ -43,11 +43,32 @@ public class Path implements java.io.Serializable {
 		
 	}
 
+	/** Adiciona um troço no fim desta Path
+	 * FIXME pode criar paths descontinuas
+	 * @param tempPath
+	 */
 	public void add(Path tempPath) {
 		for(Point point : tempPath.getPath()){
 			this.path.add(point);
 		}
 	}
+	
+	
+	/** Retorna o primeiro ponto em commum entre duas Paths 
+	 */
+	public Point getFirstCommon(Path path2){
+		for(Point p1 : this.getPath()){
+			for(Point p2 : path2.getPath()){
+				if(p1.equals(p2)){
+					return p1;
+				}
+			}
+		}
+		return null;
+	}
+	
+	
+	
 	
 	
 	
