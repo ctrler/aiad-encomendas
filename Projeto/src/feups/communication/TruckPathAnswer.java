@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.Serializable;
 
 import feups.map.Path;
+import feups.parcel.Parcel;
 
 public class TruckPathAnswer implements Serializable{
 	
@@ -17,8 +18,7 @@ public class TruckPathAnswer implements Serializable{
 	 */
 	double cost;
 	
-	//Parcel parcelMine;
-	//Parcel parcelTheirs;
+	Parcel parcelTheirs;
 	
 	/** Modo de funcionamento no ponto de encontro
 	 * 1 troca a parcel de mine para theirs 
@@ -78,6 +78,18 @@ public class TruckPathAnswer implements Serializable{
 
 	public void setMode(int mode) {
 		this.mode = mode;
+	}
+
+	public Parcel getParcelTheirs() {
+		return parcelTheirs;
+	}
+
+	public void setParcelTheirs(Parcel parcelTheirs) {
+		this.parcelTheirs = parcelTheirs;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	} 
 	
 	

@@ -47,6 +47,8 @@ public class Debug {
 				return true;
 			case DEBUGEVALROUTE:
 				return false;
+			case AGENTLOCATION:
+				return false;
 			default:
 				return false;
 		

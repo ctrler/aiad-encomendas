@@ -9,9 +9,9 @@ import feups.parcel.Parcel;
 public class TruckPathCommunication implements java.io.Serializable {
 	
 	Path currentRoute;
-	Set<Parcel> cargo;
+	Parcel cargo;
 	
-	public TruckPathCommunication(Path currentRoute, Set<Parcel> cargo){
+	public TruckPathCommunication(Path currentRoute,Parcel cargo){
 		this.currentRoute = currentRoute;
 		this.cargo = cargo;
 	}
@@ -24,7 +24,7 @@ public class TruckPathCommunication implements java.io.Serializable {
 		return this.currentRoute;
 	}
 	
-	public Set<Parcel> getParcels(){
+	public Parcel getParcel(){
 		return this.cargo;
 	}
 	
