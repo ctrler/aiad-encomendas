@@ -46,7 +46,7 @@ public class Debug {
 			case PARCELNEGOTIATION:
 				return true;
 			case DEBUGEVALROUTE:
-				return false;
+				return true;
 			case AGENTLOCATION:
 				return false;
 			default:

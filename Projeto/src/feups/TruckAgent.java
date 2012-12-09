@@ -497,7 +497,7 @@ public class TruckAgent extends Agent {
 					         }
 				Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() " + reply);
 				send(reply);
-				send(reply);
+				send(reply); // FIXME Sim, isto é muito estranho mas se nao enviar duas vezes o receptor por vezes nao recebe.
 				// Colocamos tudo nos valores normais
 				talkingTo = "";
 				Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() Fim, vamos entregar as parcels" + currentRoute.toString());
@@ -768,10 +768,10 @@ public class TruckAgent extends Agent {
 			double custoA = pathA.calculateLenght();
 			double custoB = pathB.calculateLenght();
 			
-//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH A: "+pathA.toString());
-//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS A ####\n"+this.roads.printRoute(pathA));
-//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH B: "+pathB.toString());
-//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS B ####\n"+this.roads.printRoute(pathB));
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH A: "+pathA.toString());
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS A ####\n"+this.roads.printRoute(pathA));
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH B: "+pathB.toString());
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS B ####\n"+this.roads.printRoute(pathB));
 			
 			
 			// Determinar o ponto de encontro em path1 e path2
@@ -787,17 +787,26 @@ public class TruckAgent extends Agent {
 			if(pontoEncontro==null)
 				return null;
 			
+			Path pathA_encontro = autoPilot.getPath(pontoOrigemA, pontoEncontro);
 			// Custo de entregar ponto de encontro + minha +  dele;
-			Path pathA_mais_B = autoPilot.getPath(pontoOrigemA, pontoEncontro);
+			if(pontoOrigemA.equals(pontoEncontro)){
+				Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> WARNING: Ponto de encontro A é igual a ponto Origem");
+			}
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> Path A a encontro " + pathA_encontro.toString());
+			
+			Path pathA_mais_B = pathA_encontro;
+			
 			
 			List<Point> pointsParcels = new LinkedList<Point>();
-			pointsParcels.add(pontoDestinoA);
+			pointsParcels.add(pontoDestinoA); 
 			pointsParcels.add(pontoDestinoB);
 			
 			Path novaPathA = autoPilot.getPath(pontoEncontro, pointsParcels);
-			
 			pathA_mais_B.add(autoPilot.getPath(pontoEncontro, pointsParcels));
-		
+			
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PontoDestino A " + pontoDestinoA);
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PontoDestino B " + pontoDestinoB);
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> Path pontoEncontro a P1 " + novaPathA.toString());
 			
 			/* Como o AutoPilot.getPath() devolve apenas o path ate ao primeiro ponto
 			 * temos que ver qual dos pontos é que ele encontrou primeiro e depois 
@@ -832,7 +841,7 @@ public class TruckAgent extends Agent {
 			
 			Debug.print(Debug.PrintType.DEBUGEVALROUTE,"custo separados: " + hipoteseSeparados +"\ncusto juntos: " + hipoteseJuntos);
 			
-			if(hipoteseSeparados > hipoteseJuntos){
+			if(hipoteseSeparados > hipoteseJuntos + 1){ // FIXME Mais um porque.... sim
 				Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ENCONTRADA PATH MELHOR");
 				TruckPathAnswer tpa;
 				tpa = new TruckPathAnswer( novaPathA, novaPathB, pontoEncontro, hipoteseJuntos, modo);

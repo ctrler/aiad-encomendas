@@ -276,8 +276,12 @@ public class World extends Agent {
 						// Preenche o truckBeacon com os dados recebidos e
 						// constroi lista de pontos percorridos
 						Truck truckBeacon = getTruck(msg.getSender().getLocalName());	//Retorna o truck correspondente
+						Point oldPosition = truckBeacon.getCurrentPosition();
 						truckBeacon.setCurrentPosition(reg.getCurrentPosition().getLocation());		//Atualiza a posicao do truck
-						truckBeacon.addKM();											//Incrementa 1km percorrido
+						if(!oldPosition.equals(truckBeacon.getCurrentPosition())){
+							truckBeacon.addKM(); //Incrementa 1km percorrido
+						}
+										
 						truckBeacon.getPositionHistory().add(reg.getCurrentPosition()); //Adiciona ponto percorrido ao histórico
 					
 					}
@@ -303,12 +307,13 @@ public class World extends Agent {
 		public void onTick() {
 			
 			String line = "";
-			
+			double totalKm  = 0.0;
 			for(Map.Entry<String, Truck> cursor : trucks.entrySet()) {
 				line = line.concat(cursor.getKey() + ": " + cursor.getValue().getCurrentPosition().getX() + "," + cursor.getValue().getCurrentPosition().getY()+"\t");
+				totalKm += cursor.getValue().getKM();
 			}
 
-			guiText(printRoads()+"\n##### Trucks ####\n"+line);
+			guiText(printRoads()+"\n##### Trucks ####\n"+line + "\nTotal Km: "+totalKm);
 			
 		}
 
