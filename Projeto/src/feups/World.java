@@ -104,7 +104,7 @@ public class World extends Agent {
 
 		// defines the behaviour
 				
-		addBehaviour(new CreateParcel(this));
+		//addBehaviour(new CreateParcel(this));
 		addBehaviour(new ReceiveTruckMovement(this));
 		addBehaviour(new PrintStatus(this));
 		
@@ -141,14 +141,11 @@ public class World extends Agent {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
-		
-
-		  
 	}
 	
 	
+	/** Behaviour que implementa o GUI */
 	public class GuiBehaviour extends OneShotBehaviour{
 
 		/**
@@ -293,28 +290,25 @@ public class World extends Agent {
 	}
 	
 	/**
-	 * Imprime o estado de todos os camioes
+	 * Imprime o mapa e o estado de todos os camioes
 	 * em: http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer6.html#6.6.4
 	 */
 	class PrintStatus extends TickerBehaviour {
 		private static final long serialVersionUID = 1837679922616403427L;
-		private int n = 0;
 
 		public PrintStatus(Agent a) {
-			super(a, 1000); 
+			super(a, 500); 
 		}
 
 		public void onTick() {
 			
-			for(String name: trucks.keySet())
-				System.err.print(name + "\t");
-			System.err.println();
-			for(Map.Entry<String, Truck> cursor : trucks.entrySet()) {
-				System.err.print(cursor.getValue().getCurrentPosition().getX() + "," + cursor.getValue().getCurrentPosition().getY()+"\t\t");
-			}
-			System.err.println();
+			String line = "";
 			
-			guiText(printRoads());
+			for(Map.Entry<String, Truck> cursor : trucks.entrySet()) {
+				line = line.concat(cursor.getKey() + ": " + cursor.getValue().getCurrentPosition().getX() + "," + cursor.getValue().getCurrentPosition().getY()+"\t");
+			}
+
+			guiText(printRoads()+"\n##### Trucks ####\n"+line);
 			
 		}
 
@@ -424,8 +418,8 @@ public class World extends Agent {
 
 		if (!parcels.containsKey(name)) {
 			parcels.put(name, parcel);
-			//this.getMap().setXY(destination.getPosition().getX(),
-			//		destination.getPosition().getY(), "P");
+			this.getMap().setXY(destination.getPosition().getX(),
+					destination.getPosition().getY(), "P");
 			return true;
 		} else
 			return false;

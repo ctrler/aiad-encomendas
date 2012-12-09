@@ -28,13 +28,4 @@ public class TruckPathCommunication implements java.io.Serializable {
 		return this.cargo;
 	}
 	
-	/** Retorna a melhor rota comparada com outra path ou null se não houver rota em comum
-	 */
-	public Path getBest(Path otherPath, Point destination){
-		
-		// TODO Aqui vou colocar o algoritmo.
-		
-		return null;
-	}
-
 }

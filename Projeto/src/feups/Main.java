@@ -53,17 +53,14 @@ public class Main {
 		Point pontoDestinoA = new Point(11,11);
 		Point pontoDestinoB =  new Point(7,11);
 		
-		City destinoA = new City("Cidade destino A", pontoDestinoA);
-		City destinoB = new City("Cidade destino B", pontoDestinoB);
-		
-		Parcel A = new Parcel("A",pontoOrigemA, destinoA);
-		Parcel B = new Parcel("B",pontoOrigemB, destinoA);
-		
 		Path pathA = autoPilot.getPath(pontoOrigemA, pontoDestinoA);
 		Path pathB = autoPilot.getPath(pontoOrigemB, pontoDestinoB);
 		
-		int custoA = pathA.getPath().size();
-		int custoB = pathB.getPath().size();
+		double custoA = pathA.calculateLenght();
+		double custoB = pathB.calculateLenght();
+		System.out.println("custo A " + custoA);
+		System.out.println("custo B " + custoB);
+		
 		
 		System.out.println(pathA.toString());
 		System.out.println(world.getMap().printRoute(pathA));
@@ -106,10 +103,10 @@ public class Main {
 		
 		/* Agora que temos todas as hipoteses verificamos qual é a melhor opção
 		 */
-		int custoPathA_mais_B = pathA_mais_B.getPath().size();
+		double custoPathA_mais_B = pathA_mais_B.calculateLenght();
 		
-		int hipoteseSeparados = custoA+custoB;
-		int hipoteseJuntos = custoPathA_mais_B + autoPilot.getPath(pontoOrigemB, pontoEncontro).getPath().size();
+		double hipoteseSeparados = custoA+custoB;
+		double hipoteseJuntos = custoPathA_mais_B + autoPilot.getPath(pontoOrigemB, pontoEncontro).calculateLenght();
 		
 		System.out.println("custo separados: " + hipoteseSeparados +"\ncusto juntos: " + hipoteseJuntos);
 			

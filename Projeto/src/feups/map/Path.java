@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.LinkedList;
 
 public class Path implements java.io.Serializable {
+	private static final long serialVersionUID = 3744198155885568273L;
+
 	private LinkedList<Point> path;
 	
 	public Path(){
@@ -22,11 +24,15 @@ public class Path implements java.io.Serializable {
 		return this.path;
 	}
 	
-	public long calculateLenght(){
-		long len = 0;
+	public double calculateLenght(){
+		double len = 0.0;
+		
+		if(path.isEmpty()) //Quando path é vazia
+			return len;
+		
 		Point before = path.getFirst();
 		for(Point p: path){
-			p.distance(before);
+			len += before.distance(p);
 			before = p;
 		}
 		return len;
@@ -67,8 +73,19 @@ public class Path implements java.io.Serializable {
 		return null;
 	}
 	
+	/** 
+	 * O início da rota
+	 */
+	public Point getOrigin(){
+		return path.getFirst();
+	}
 	
-	
+	/**
+	 * O final da rota
+	 */
+	public Point getDestination(){
+		return path.getLast();
+	}
 	
 	
 	

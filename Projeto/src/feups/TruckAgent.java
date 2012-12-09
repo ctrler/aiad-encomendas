@@ -10,9 +10,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 
 import feups.communication.ParcelCommunication;
+import feups.communication.TruckPathAnswer;
 import feups.communication.TruckPathCommunication;
 import feups.communication.TruckWorldPosCommunication;
 import feups.ia.AutoPilot;
@@ -36,7 +38,7 @@ import jade.lang.acl.UnreadableException;
 
 public class TruckAgent extends Agent {
 	
-	public enum Modo {PARCEL, ENCONTRO};
+	public enum Modo {PARCEL, ENCONTRO_OFERECE, ENCONTRO_RECEBE, NEGOCIACAO};
 	
 	/** Parcels a entregar que nao estao na minha carga*/
 	Set<Parcel> parcels;
@@ -64,6 +66,10 @@ public class TruckAgent extends Agent {
 	double km;
 	
 	private static final long serialVersionUID = -4023017875029640114L;
+	
+	Random rnd;
+	
+	String talkingTo;
 
 	public TruckAgent(Truck truck, Roads map, Set<Parcel> cargo) {
 		this.currentPosition = truck.getCurrentPosition();
@@ -79,7 +85,8 @@ public class TruckAgent extends Agent {
 	}
 
 	protected void setup() {
-		System.out.println("########## TRUCK AGENT " + getLocalName()
+		rnd = new Random( hashCode() + System.currentTimeMillis());
+		Debug.print(Debug.PrintType.SETUP,"########## TRUCK AGENT " + getLocalName()
 				+ ": Acordado");
 		// regista agente no DF
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -95,16 +102,9 @@ public class TruckAgent extends Agent {
 			e.printStackTrace();
 		}
 
-		// pesquisa DF por agentes "Agente World"
-//		DFAgentDescription template = new DFAgentDescription();
-//		ServiceDescription sd1 = new ServiceDescription();
-//		sd1.setType("Agente World");
-//		template.addServices(sd1);
-		
-		
 		ParallelBehaviour par = new ParallelBehaviour(
 				ParallelBehaviour.WHEN_ALL);
-		par.addSubBehaviour(new TruckAgentBehaviour(this));
+		//par.addSubBehaviour(new ColaborateBehaviour(this));
 		par.addSubBehaviour(new DeliveryParcelsBehaviour(this));
 		//par.addSubBehaviour(new BehaviourPrintStuff(this));
 
@@ -118,22 +118,23 @@ public class TruckAgent extends Agent {
 	 * Behaviour que responde a mensagens
 	 * 
 	 */
-	class TruckAgentBehaviour extends CyclicBehaviour {
+	class ColaborateBehaviour extends CyclicBehaviour {
 		private static final long serialVersionUID = 1837679922616403427L;
 
 		// construtor do behaviour
-		public TruckAgentBehaviour(Agent a) {
+		public ColaborateBehaviour(Agent a) {
 			super(a);
 		}
 
 		// método action
 		public void action() {
-
 			ACLMessage msg = receive();
 			if (msg != null) {
-				
-				//Caso seja mensagem de rotina de escuta
-				if (msg.getPerformative() == ACLMessage.INFORM) {
+
+				/* ######## INFORM ##########
+				 * 
+				 */
+				if (msg.getPerformative() == ACLMessage.INFORM && modoF==Modo.PARCEL) { // So responde se estiver em modo parcel
 					
 					try {
 						Object obj = msg.getContentObject();
@@ -141,36 +142,72 @@ public class TruckAgent extends Agent {
 						// Caso a mensagem seja um Path vindo de outros trucks
 						if(obj!=null && obj instanceof TruckPathCommunication){
 							TruckPathCommunication reg =  (TruckPathCommunication) obj;
-							Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
-							//TODO: Calcular RV e enviar reply;
-							//Verificar qual o ponto comum mais próximo
+							Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> INFORM: TruckPathCommunication from truck " + msg.getSender().getLocalName());
 							
-							//Gerar Novo PATH em comum
+							TruckPathAnswer ans = evaluateRoute(reg.getCurrentRoute());
 							
-							//Verificar se novo Path gerado é melhor em termos de custo que
-							//antigos paths somados
+							if(ans!=null){
+								modoF=Modo.NEGOCIACAO; // Para parar com as coisas
+								Debug.print(Debug.PrintType.PARCELNEGOTIATION,this.myAgent.getLocalName()+"> Posso ajudar " + msg.getSender().getLocalName() +
+										" encontro em " + ans.getMeeting());
+								
+								ACLMessage reply = msg.createReply();
+								
+								talkingTo = ""+rnd.nextLong(); // unique hash;
+								reply.setConversationId(talkingTo);
+								
+								reply.setContentObject(ans);
+								reply.setLanguage("JavaSerialization");
+								reply.setPerformative(ACLMessage.PROPOSE);
+								
+								send(reply);
+							}
+							else{
+								Debug.print(Debug.PrintType.PARCELNEGOTIATION,this.myAgent.getLocalName()+"> ANS null");
+								 modoF=Modo.PARCEL;
+							}
 							
 						}
+						else{
+							 modoF=Modo.PARCEL;
+						}
 					} catch (UnreadableException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					
 					
 				}
-				//Caso seja mensagem de REQUEST
-				if(msg.getPerformative() == ACLMessage.PROPOSE){
+				
+				/* ######## PROPOSE ##########
+				 * 
+				 */
+				if(msg.getPerformative() == ACLMessage.PROPOSE && modoF==Modo.PARCEL){
 					//Caso seja REQUEST do path
-					Debug.print(1,"<" + getLocalName() + "> Received PROPOSE From <" + msg.getSender().getLocalName() + ">");
+					Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Received PROPOSE From <" + msg.getSender().getLocalName() + ">");
 					try {
-						// Caso a mensagem recebida seja "sendPath"
-						// envia resposta ao sender com o currentRoute atual
-						if(msg.getContent().equals("sendPath")){
+						
+						Object obj = msg.getContentObject();
+						
+						// FIXME Colocar isto a responder a fazer uma lista de prioridades de propostas
+						if(obj instanceof TruckPathAnswer){
 							
-							TruckPathCommunication reg = new TruckPathCommunication(currentRoute, cargo);
+							TruckPathAnswer reg = (TruckPathAnswer) obj;
+							
+							// Coloco me em modo de recebe e vou ate ao destino
+							// onde espero por uma mensagem.
+							modoF = Modo.ENCONTRO_OFERECE;
+							Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> modeF = ENCONTRO_OFERECE");
+							
+							destination = reg.getMeeting();
+							currentRoute = autoPilot.getPath(currentPosition, destination);
 							
 							ACLMessage reply = msg.createReply();
 							
 							reply.setContentObject(reg);
+							reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
 							reply.setLanguage("JavaSerialization");
 							
 							send(reply);
@@ -178,23 +215,43 @@ public class TruckAgent extends Agent {
 						}else{
 							// Caso a mensagem seja a resposta ao REQUEST
 							// de envio do Path
-							Object obj = msg.getContentObject();
+							Object obj2 = msg.getContentObject();
 							if(obj!=null){
-								if(obj instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
-									TruckPathCommunication reg =  (TruckPathCommunication) obj;
-									Debug.print(1,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
+								if(obj2 instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
+									TruckPathCommunication reg =  (TruckPathCommunication) obj2;
+									Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
 								}
 							}
 							
 							/* Adiciona novas parcels ao cargo */
-							if(obj instanceof ParcelCommunication){
-								ParcelCommunication reg =  (ParcelCommunication) obj;
+							if(obj2 instanceof ParcelCommunication){
+								ParcelCommunication reg =  (ParcelCommunication) obj2;
 								cargo.add(reg.getParcel()); // FIXME Mudar para parcels
 								Debug.print(Debug.PrintType.PARCELDELIVERY, this.myAgent.getLocalName() + " > RECEBIDA UMA PARCEL");
 							}
 						}
 					}catch (IOException | UnreadableException ex) { ex.printStackTrace();}
 				}
+				
+				/* ######## ACCEPT_PROPOSAL ##########
+				 * 
+				 */
+				if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && modoF==Modo.NEGOCIACAO && msg.getConversationId().equals(talkingTo) ){
+					
+					Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Received ACCEPT_PROPOSAL From <" + msg.getSender().getLocalName() + ">");
+					try {
+						
+						Object obj = msg.getContentObject();
+						
+						if(obj instanceof TruckPathAnswer){
+							TruckPathAnswer reg = (TruckPathAnswer) obj;
+							destination = reg.getMeeting();
+							currentRoute = autoPilot.getPath(currentPosition, destination);
+							modoF=Modo.ENCONTRO_OFERECE;
+						}
+					}catch (UnreadableException ex) { ex.printStackTrace();}
+				}
+						
 			}
 			block(); // Bloqueia até a proxima mensagem chegar
 		}
@@ -210,12 +267,13 @@ public class TruckAgent extends Agent {
 
 		// construtor do behaviour
 		public DeliveryParcelsBehaviour(Agent a) {
-			super(a, 2000); // Imprime a mensagem a cada 1 segundo
+			super(a, 2000); // Imprime a mensagem a cada 2 segundo
 		}
 
 		// método action
 		public void onTick() {
-			Debug.print(1, "<" + this.myAgent.getLocalName() + "> \tGPS: " + currentPosition.getX() + " " + currentPosition.getY() + " Destination is " + destination);
+			if(destination!=null)
+				Debug.print(Debug.PrintType.AGENTLOCATION, "<" + this.myAgent.getLocalName() + "> \tGPS: " + currentPosition.getX() + " " + currentPosition.getY() + " Destination is " + destination);
 
 
 			moveCargo(); //Actualizamos a localização dos parcels dentro do camião 
@@ -237,12 +295,26 @@ public class TruckAgent extends Agent {
 				
 				// Se estivermos em modo parcel criamos nova rota
 				if(modoF == Modo.PARCEL){
-					//Parcel nextP = getNextCargoParcel();
-					currentRoute = getFullRoute();
-					if(currentRoute!=null){			// Apenas se houver parcel para entregar
-						destination = currentRoute.getPath().getLast();
-						informOtherTrucks();
-						//currentRoute = autoPilot.getPath(currentPosition, destination);
+					Parcel nextP = getNextCargoParcel();
+					//currentRoute = getFullRoute();
+					if(nextP!=null){			// Apenas se houver parcel para entregar
+						//destination = currentRoute.getPath().getLast();
+						destination = nextP.getDestination().getPosition();
+						currentRoute = autoPilot.getPath(currentPosition, destination );
+						//informOtherTrucks();
+						
+						/*
+						 * Envia as mensagens ligueiramente em diferido para nao haver race conditions
+						 */
+		                addBehaviour( 
+		                        new DelayBehaviour( myAgent, rnd.nextInt( 200 )+30)
+		                        {
+		                        	private static final long serialVersionUID = -8022836574000583133L;
+
+								public void handleElapsedTimeout() { 
+		                        	   informOtherTrucks(); 
+									}
+		                        });
 					}
 				}
 			}
@@ -270,7 +342,7 @@ public class TruckAgent extends Agent {
 						makeMove(input);
 						informWorld();
 					} catch (EndOfMapException | IOException e) {
-						Debug.print(0,e.getMessage());
+						Debug.print(Debug.PrintType.PARCELDELIVERY,e.getMessage());
 					}
 				}
 			}
@@ -297,8 +369,6 @@ public class TruckAgent extends Agent {
 						template);
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				
-				TruckPathCommunication reg = new TruckPathCommunication(currentRoute, cargo);
-				
 				for (int i = 0; i < result.length; ++i){
 					if(!result[i].getName().getLocalName().equals(getLocalName())){
 						// Envia uma mensagem para multiplos destinos
@@ -307,6 +377,7 @@ public class TruckAgent extends Agent {
 					}
 				}
 				
+				TruckPathCommunication reg = new TruckPathCommunication(currentRoute, cargo);
 				msg.setContentObject(reg);
 				msg.setLanguage("JavaSerialization");
 				//msg.setContent("sendPath");
@@ -322,7 +393,7 @@ public class TruckAgent extends Agent {
 			for(Parcel parcel : cargo){
 				Path tempPath = autoPilot.getPath(parcel.getPosition().getLocation(),parcel.getDestination().getPosition());
 				Path connectionPath = autoPilot.getPath(parcel.getDestination().getPosition(),parcel.getDestination().getPosition());
-				System.out.println("PATH de " + getLocalName() + " " + tempPath);
+				//System.out.println("PATH de " + getLocalName() + " " + tempPath);
 				fullRoute.add(tempPath);
 			}
 			if(fullRoute.getPath().isEmpty()){
@@ -361,26 +432,6 @@ public class TruckAgent extends Agent {
 	}
 	
 
-	/**
-	 * Behaviour que envia posição actual ao World
-	 * 
-	 */
-	class BehaviourPrintStuff extends TickerBehaviour {
-		private static final long serialVersionUID = 1837679922616403427L;
-
-		// construtor do behaviour
-		public BehaviourPrintStuff(Agent a) {
-			super(a, 2000); // Imprime a mensagem a cada 1 segundo
-		}
-
-		// método action
-		public void onTick() {
-			System.out.println("<" + this.myAgent.getLocalName()
-					+ "> Printing some stuff");
-		}
-
-	}
-	
 	public Set<Parcel> getParcels() {
 		return this.parcels;
 	}
@@ -404,18 +455,18 @@ public class TruckAgent extends Agent {
 		List<Parcel> cargoParcels = new LinkedList<Parcel>(cargo);
 
 		Parcel closest = null;
-		long dist = Long.MAX_VALUE;
+		double dist = Double.MAX_VALUE;
 		
 		for(Parcel p : cargoParcels){
 			Path tempPath = autoPilot.getPath(getCurrentPosition(),p.getDestination().getPosition());
-			long tempDist = tempPath.calculateLenght();
+			double tempDist = tempPath.calculateLenght();
 			if(tempDist < dist){
 				closest = p;
 				dist = tempDist;
 			}
 		}
 		
-		Debug.print(2,this.getLocalName() + ": Proxima parcel is "+ closest);
+		Debug.print(Debug.PrintType.GETNEXTPARCEL,this.getLocalName() + ": Proxima parcel is "+ closest);
 		return closest;
 	}
 	
@@ -511,7 +562,7 @@ public class TruckAgent extends Agent {
 			Parcel parcel = iter.next();
 			/* Entregamos a parcel */
 			if(parcel.getDestination().getPosition().equals(this.getCurrentPosition())){
-				Debug.print(1,this.getLocalName() + " ENTREGOU " + parcel.getNome() + " Km: " + km + " a "
+				Debug.print(Debug.PrintType.PARCELDELIVERY,this.getLocalName() + " ENTREGOU " + parcel.getNome() + " Km: " + km + " a "
 						+ currentPosition.getX() + " " + currentPosition.getY());
 				delivered.add(parcel);
 				iter.remove();
@@ -519,6 +570,101 @@ public class TruckAgent extends Agent {
 		}
 	}
 	
+	
+	/**
+	 * Retorna a melhor rota de entre duas possíveis
+	 * 
+	 * @return 
+	 * 
+	 */
+	public TruckPathAnswer evaluateRoute(Path pathB){
+		
+		/* modo de troca
+		 * por agora deixo no modo 2 
+		 * (é sempre o agente que propoe que leva as parcels)
+		 * ver comentario sobre modo no TruckPathanswer
+		 */
+		int modo = 2;
+		
+		Point pontoOrigemA = this.currentPosition;
+		Point pontoDestinoA = this.destination;
+		
+		Point pontoOrigemB = pathB.getOrigin();
+		Point pontoDestinoB = pathB.getDestination();
+		
+		Path pathA = this.currentRoute; //TODO Será que isto pode mudar a meio da execução?
+		
+		if(pathA!=null && pontoDestinoA!=null){
+			
+			double custoA = pathA.calculateLenght();
+			double custoB = pathB.calculateLenght();
+			
+//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH A: "+pathA.toString());
+//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS A ####\n"+this.roads.printRoute(pathA));
+//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> PATH B: "+pathB.toString());
+//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ROADS B ####\n"+this.roads.printRoute(pathB));
+			
+			
+			// Determinar o ponto de encontro em path1 e path2
+			Point pontoEncontroA = pathA.getFirstCommon(pathB);
+			Point pontoEncontroB = pathB.getFirstCommon(pathA);
+			
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> Ponto de encontro A é " + pontoEncontroA);
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> Ponto de encontro B é " + pontoEncontroB);
+			
+			// FIXME Fazer isto para os dois pontos... 
+			Point pontoEncontro = pontoEncontroB;
+			
+			if(pontoEncontro==null)
+				return null;
+			
+			// Custo de entregar ponto de encontro + minha +  dele;
+			Path pathA_mais_B = autoPilot.getPath(pontoOrigemA, pontoEncontro);
+			
+			List<Point> pointsParcels = new LinkedList<Point>();
+			pointsParcels.add(pontoDestinoA);
+			pointsParcels.add(pontoDestinoB);
+			
+			pathA_mais_B.add(autoPilot.getPath(pontoEncontro, pointsParcels));
+			
+			/* Como o AutoPilot.getPath() devolve apenas o path ate ao primeiro ponto
+			 * temos que ver qual dos pontos é que ele encontrou primeiro e depois 
+			 * adicionar o path até ao segundo ponto.
+			 */
+			if(pathA_mais_B.getPath().getLast().equals(pontoDestinoA)){
+				pathA_mais_B.add(autoPilot.getPath(pontoDestinoA, pontoDestinoB));
+			}
+			else{
+				pathA_mais_B.add(autoPilot.getPath(pontoDestinoB, pontoDestinoA));
+			}
+			
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> Path A+B: "+ pathA_mais_B.toString());
+//			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> "+ this.roads.printRoute(pathA_mais_B));
+			
+			/* Agora que temos todas as hipoteses verificamos qual é a melhor opção
+			 */
+			double custoPathA_mais_B = pathA_mais_B.calculateLenght();
+			
+			
+			Path novaPathB = autoPilot.getPath(pontoOrigemB, pontoEncontro);
+
+			double hipoteseJuntos = custoPathA_mais_B + novaPathB.calculateLenght();
+			double hipoteseSeparados = custoA+custoB;
+			
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,"custo separados: " + hipoteseSeparados +"\ncusto juntos: " + hipoteseJuntos);
+			
+			if(hipoteseSeparados > hipoteseJuntos){
+				Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> ENCONTRADA PATH MELHOR");
+				return new TruckPathAnswer( pathA_mais_B, novaPathB, pontoEncontro, hipoteseJuntos, modo);
+			}
+			else{
+				return null;
+			}
+		} // Fim do calculo para quando existe rota
+		
+		return null;
+
+	}
 	
 	
 }
