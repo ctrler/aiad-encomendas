@@ -27,7 +27,7 @@ public class Parser {
 		this.world = world;
 		FileInputStream is;
 		try {
-			is = new FileInputStream("maps/map03.json");
+			is = new FileInputStream("maps/map05.json");
 		} catch (FileNotFoundException e1) {
 			System.err.println("File not found.");
 			return;

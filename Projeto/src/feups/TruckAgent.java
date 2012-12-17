@@ -165,7 +165,7 @@ public class TruckAgent extends Agent {
 								send(reply);
 							}
 							else{
-								Debug.print(Debug.PrintType.PARCELNEGOTIATION,this.myAgent.getLocalName()+"> ANS null");
+								Debug.print(Debug.PrintType.PARCELNEGOTIATION2,this.myAgent.getLocalName()+"> ANS null");
 								 modoF=Modo.PARCEL;
 							}
 							
@@ -216,24 +216,12 @@ public class TruckAgent extends Agent {
 							send(reply);
 							addBehaviour(new SendsParcelBehaviour(this.myAgent, reg, msg));
 						}
-//						else{
-//							// Caso a mensagem seja a resposta ao REQUEST
-//							// de envio do Path
-//							Object obj2 = msg.getContentObject();
-//							if(obj!=null){
-//								if(obj2 instanceof TruckPathCommunication){ 						// Verifica o tipo de objecto
-//									TruckPathCommunication reg =  (TruckPathCommunication) obj2;
-//									Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Received Message From <" + msg.getSender().getLocalName() + "> | Content: " + reg);
-//								}
-//							}
-//							
-//							/* Adiciona novas parcels ao cargo */
-//							if(obj2 instanceof ParcelCommunication){
-//								ParcelCommunication reg =  (ParcelCommunication) obj2;
-//								cargo.add(reg.getParcel()); // FIXME Mudar para parcels
-//								Debug.print(Debug.PrintType.PARCELDELIVERY, this.myAgent.getLocalName() + " > RECEBIDA UMA PARCEL");
-//							}
-//						}
+						/* Adiciona novas parcels ao cargo */
+						if(obj instanceof ParcelCommunication){
+							ParcelCommunication reg =  (ParcelCommunication) obj;
+							cargo.add(reg.getParcel()); // FIXME Mudar para parcels
+							Debug.print(Debug.PrintType.PARCELDELIVERY, this.myAgent.getLocalName() + " > RECEBIDA UMA PARCEL");
+						}
 					}catch (IOException | UnreadableException ex) { ex.printStackTrace();}
 				}
 				
@@ -465,7 +453,7 @@ public class TruckAgent extends Agent {
 				/* se é uma mensagem do nosso interlocutor
 				 * guardamos a parcel */
 				if(msg.getConversationId().equals(talkingTo)){
-					Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() Recebemos uma parcel!" );
+					Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() Recebi uma parcel!" );
 					try {
 						answerMsg = msg; //Guardamos a mensagem para podermos responder
 						answerTPA = (TruckPathAnswer) msg.getContentObject();
@@ -493,9 +481,9 @@ public class TruckAgent extends Agent {
 				for(Iterator iterator = reply.getAllReceiver();
 						 iterator.hasNext();){
 						             AID r = (AID) iterator.next();
-						             System.out.println(getLocalName() + "> Receiver action() Destinatário: " + r.getLocalName());
+						             //System.out.println(getLocalName() + "> Receiver action() Destinatário: " + r.getLocalName());
 					         }
-				Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() " + reply);
+				//Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + "> Receiver action() " + reply);
 				send(reply);
 				send(reply); // FIXME Sim, isto é muito estranho mas se nao enviar duas vezes o receptor por vezes nao recebe.
 				// Colocamos tudo nos valores normais
@@ -582,9 +570,9 @@ public class TruckAgent extends Agent {
 				for(Iterator iterator = reply.getAllReceiver();
 						 iterator.hasNext();){
 						             AID r = (AID) iterator.next();
-						             System.out.println(getLocalName()+ "> Sender action() Destinatário: " + r.getLocalName());
+						             //System.out.println(getLocalName()+ "> Sender action() Destinatário: " + r.getLocalName());
 					         }
-					Debug.print(Debug.PrintType.PARCELNEGOTIATION,"<" + getLocalName() + 
+					Debug.print(Debug.PrintType.PARCELNEGOTIATION2,"<" + getLocalName() + 
 							"> Sender action() chegamos ao destino e enviamos a parcel");
 				send(reply);
 			}
@@ -798,9 +786,10 @@ public class TruckAgent extends Agent {
 			
 			
 			List<Point> pointsParcels = new LinkedList<Point>();
+			
 			pointsParcels.add(pontoDestinoA); 
 			pointsParcels.add(pontoDestinoB);
-			
+			Debug.print(Debug.PrintType.DEBUGEVALROUTE,this.getLocalName()+ "> pontoEncontro " + pontoDestinoA);
 			Path novaPathA = autoPilot.getPath(pontoEncontro, pointsParcels);
 			pathA_mais_B.add(autoPilot.getPath(pontoEncontro, pointsParcels));
 			

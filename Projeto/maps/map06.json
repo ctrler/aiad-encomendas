@@ -1,0 +1,61 @@
+{
+    "name": "test map",
+    "map": "maps/map_square2.map",
+    "cities": [
+        { "name": "1_1", "position": { "x": 1, "y": 1 }
+        },
+        { "name": "15_4","position": {"x": 15 ,"y": 4 }
+        },
+        { "name": "22_4","position": { "x": 22, "y": 4 }
+        },
+        { "name": "18_4","position": { "x": 18, "y": 4 }
+        },
+        { "name": "12_9","position": { "x": 12, "y": 9 }
+        },
+        { "name": "10_11","position": { "x": 10, "y": 11 }
+        },
+        { "name": "22_11","position": { "x": 22, "y": 11 }
+        }
+
+    ],
+    "parcels": [
+        { "name": "A", "position": "1_1","destination": "15_4"
+        },
+        { "name": "B","position": "1_1","destination": "18_4"
+        },
+        { "name": "C","position": "1_1","destination": "12_9"
+        },
+        { "name": "D","position": "1_1","destination": "10_11"
+        }
+        
+        
+    ],
+    "trucks": [
+        {
+            "name": "1",
+            "parcels": [
+                {
+                  "name": "A"
+                },
+                {
+                  "name": "C"
+                }
+                
+            ],
+            "position": "1_1"
+        },
+        {
+            "name": "2",
+            "parcels": [
+                {
+                    "name": "B"
+                },
+                {
+                    "name": "D"
+                }                
+            ],
+            "position": "22_4"
+        }
+    ],
+
+}

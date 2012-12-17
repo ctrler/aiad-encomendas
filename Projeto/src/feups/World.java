@@ -104,7 +104,7 @@ public class World extends Agent {
 
 		// defines the behaviour
 				
-		//addBehaviour(new CreateParcel(this));
+		addBehaviour(new CreateParcel(this));
 		addBehaviour(new ReceiveTruckMovement(this));
 		addBehaviour(new PrintStatus(this));
 		
@@ -190,7 +190,7 @@ public class World extends Agent {
 		private static final long serialVersionUID = 1L;
 
 		public CreateParcel(Agent a) {
-			super(a, 1000);
+			super(a, 5000);
 		}
 
 		@Override
@@ -202,8 +202,8 @@ public class World extends Agent {
 											// deste tipo
 			template.addServices(sd1);
 			
-			Parcel p = parcels.get("parcelEspinhoBraga2"); // FIXME Fazer isto para todas as parcels ainda nao assigned.
-			Debug.print(Debug.PrintType.PARCELDELIVERY, "<" + getLocalName() + "> Vou tentar atribuir a parcel " + p.isAssigned());
+			Parcel p = parcels.get("parcelEspinhoBraga"); // FIXME Fazer isto para todas as parcels ainda nao assigned.
+			//Debug.print(Debug.PrintType.PARCELDELIVERY, "<" + getLocalName() + "> Vou tentar atribuir a parcel " + p.isAssigned());
 			
 			if(!p.isAssigned()){
 				
@@ -217,11 +217,11 @@ public class World extends Agent {
 					DFAgentDescription[] result = DFService.search(this.myAgent,
 							template);
 					
-					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 					
 					// FIXME Obter o camião mais próximo!
 					for (int i = 0; i < result.length; ++i){
-						if(result[i].getName().getLocalName().equals("2")){
+						if(result[i].getName().getLocalName().equals("1")){
 							msg.addReceiver(result[i].getName());
 							Debug.print(1, "<" + getLocalName() + "> Enviada parcel" + reg.getParcel().getNome() +" para: " + result[i].getName());
 						}

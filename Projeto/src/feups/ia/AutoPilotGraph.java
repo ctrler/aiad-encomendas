@@ -11,14 +11,76 @@ import feups.Debug;
 import feups.city.City;
 import feups.map.Roads;
 import feups.map.Path;
+import org.jgrapht.*;
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
 
 
-public class AutoPilot {
+public class AutoPilotGraph {
 	
 	private Roads map;
+	public UndirectedGraph<Point,DefaultEdge> graph;
 	
-	public AutoPilot(Roads map){
+	public AutoPilotGraph(Roads map){
 		this.map = map;
+		ArrayList<ArrayList<String>> l = map.getMap();
+		graph = new SimpleGraph<Point,DefaultEdge>(DefaultEdge.class);
+			
+		for(int lin=0; lin< l.size(); lin++){
+			for(int col=0; col<l.get(lin).size();col++){
+				if(isWalkable(l.get(lin).get(col))){
+					Point p = new Point(col,lin);
+					graph.addVertex(p);
+
+					// Left
+					try{
+						if(isWalkable(l.get(lin).get(col-1))){
+							Point nextP = new Point(lin,col-1);
+							
+							graph.addVertex(nextP);
+							graph.addEdge(p, nextP);
+						}
+					}catch(IndexOutOfBoundsException e){
+					}
+					
+					// up
+					try{
+						if(isWalkable(l.get(lin+1).get(col))){
+							Point nextP = new Point(lin+1,col);
+			
+							graph.addVertex(nextP);
+							graph.addEdge(p, nextP);
+						}
+					}catch(IndexOutOfBoundsException e){
+					}
+					
+					//down
+					try{
+						if(isWalkable(l.get(lin-1).get(col))){
+							Point nextP = new Point(lin-1,col);
+							
+							graph.addVertex(nextP);
+							graph.addEdge(p, nextP);
+						}
+					}catch(IndexOutOfBoundsException e){
+					}
+					
+					//Right
+					try{
+						if(isWalkable(l.get(lin).get(col+11))){
+							Point nextP = new Point(lin,col+1);
+							
+							graph.addVertex(nextP);
+							graph.addEdge(p, nextP);
+						}
+					}catch(IndexOutOfBoundsException e){
+					}				
+		
+				}
+			}
+			
+		}
 	}
 	
 	private boolean isWalkable(String left){
@@ -40,7 +102,6 @@ public class AutoPilot {
 		}
 		
 		double minDistance = Collections.min(tempPoints);
-		
 		ArrayList<Integer> nearPointsIndex = new ArrayList<Integer>();
 
 		for(int i = 0; i < tempPoints.size(); i++){
@@ -49,11 +110,14 @@ public class AutoPilot {
 			}
 		}
 		
-//		Random r = new Random();
-//		int minDistancePointIndex = nearPointsIndex.get(r.nextInt(nearPointsIndex.size()));
+		
+		//Random r = new Random();
+		//int minDistancePointIndex = nearPointsIndex.get(r.nextInt(nearPointsIndex.size()));
 		int minDistancePointIndex = nearPointsIndex.get(0);
 		Point destination = destinations.get(minDistancePointIndex);
-		Debug.print(Debug.PrintType.DEBUGEVALROUTE,"getPath()" + destination);
+		
+		
+		List<DefaultEdge> path =  DijkstraShortestPath.findPathBetween(graph, origin, destination);
 		
 		return getPath(origin, destination);
 	}

@@ -16,7 +16,7 @@ public class Debug {
 	    AGENTLOCATIONRECEIVED, 
 	    AUTOPILOT, 
 	    DEBUGEVALROUTE, 
-	    SETUP, GETNEXTPARCEL, PARCELNEGOTIATION
+	    SETUP, GETNEXTPARCEL, PARCELNEGOTIATION, PARCELNEGOTIATION2
 	}
 	
 	public static void print(PrintType level, String msg){
@@ -42,11 +42,11 @@ public class Debug {
 			case PARCELDELIVERY:
 				return true;
 			case GETNEXTPARCEL:
-				return true;
+				return false;
 			case PARCELNEGOTIATION:
 				return true;
 			case DEBUGEVALROUTE:
-				return true;
+				return false;
 			case AGENTLOCATION:
 				return false;
 			default:
